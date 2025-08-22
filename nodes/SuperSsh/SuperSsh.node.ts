@@ -70,11 +70,109 @@ export class SuperSsh implements INodeType {
 		credentials: [
 			{
 				name: 'superSshCredentials',
-				required: true,
+				required: false,
 				testedBy: 'superSshConnectionTest',
+				displayOptions: {
+					show: {
+						configMode: ['credentials'],
+					},
+				},
 			},
 		],
 		properties: [
+			{
+				displayName: 'Configuration Mode',
+				name: 'configMode',
+				type: 'options',
+				options: [
+					{
+						name: 'Use Credentials',
+						value: 'credentials',
+						description: 'Use stored SSH credentials',
+					},
+					{
+						name: 'Dynamic Parameters',
+						value: 'dynamic',
+						description: 'Use dynamic parameters from previous nodes or environment variables',
+					},
+				],
+				default: 'credentials',
+				description: 'Choose how to configure the SSH connection',
+			},
+			// Dynamic Configuration Options
+			{
+				displayName: 'Dynamic Host',
+				name: 'dynamicHost',
+				type: 'string',
+				displayOptions: {
+					show: {
+						configMode: ['dynamic'],
+					},
+				},
+				default: '',
+				placeholder: '192.168.1.100 or server.example.com',
+				description: 'Hostname or IP address (supports expressions and environment variables)',
+				required: true,
+			},
+			{
+				displayName: 'Dynamic Port',
+				name: 'dynamicPort',
+				type: 'number',
+				displayOptions: {
+					show: {
+						configMode: ['dynamic'],
+					},
+				},
+				default: 22,
+				description: 'SSH port (supports expressions and environment variables)',
+			},
+			{
+				displayName: 'Dynamic Username',
+				name: 'dynamicUsername',
+				type: 'string',
+				displayOptions: {
+					show: {
+						configMode: ['dynamic'],
+					},
+				},
+				default: '',
+				placeholder: 'admin or root',
+				description: 'Username (supports expressions and environment variables)',
+				required: true,
+			},
+			{
+				displayName: 'Dynamic Password',
+				name: 'dynamicPassword',
+				type: 'string',
+				typeOptions: {
+					password: true,
+				},
+				displayOptions: {
+					show: {
+						configMode: ['dynamic'],
+					},
+				},
+				default: '',
+				placeholder: 'Enter password or use expression',
+				description: 'Password (supports expressions and environment variables)',
+			},
+			{
+				displayName: 'Dynamic Private Key',
+				name: 'dynamicPrivateKey',
+				type: 'string',
+				typeOptions: {
+					rows: 4,
+					password: true,
+				},
+				displayOptions: {
+					show: {
+						configMode: ['dynamic'],
+					},
+				},
+				default: '',
+				placeholder: '-----BEGIN OPENSSH PRIVATE KEY-----...',
+				description: 'Private key content (supports expressions and environment variables)',
+			},
 			{
 				displayName: 'Resource',
 				name: 'resource',
@@ -152,9 +250,9 @@ export class SuperSsh implements INodeType {
 			{
 				displayName: 'Commands',
 				name: 'commands',
-				type: 'fixedCollection',
+				type: 'string',
 				typeOptions: {
-					multipleValues: true,
+					rows: 8,
 				},
 				displayOptions: {
 					show: {
@@ -162,36 +260,9 @@ export class SuperSsh implements INodeType {
 						operation: ['executeMultiple'],
 					},
 				},
-				default: {},
-				options: [
-					{
-						name: 'commandItem',
-						displayName: 'Command',
-						values: [
-							{
-								displayName: 'Command',
-								name: 'command',
-								type: 'string',
-								default: '',
-								description: 'Command to execute',
-							},
-							{
-								displayName: 'Working Directory',
-								name: 'cwd',
-								type: 'string',
-								default: '/',
-								description: 'Working directory for the command',
-							},
-							{
-								displayName: 'Timeout',
-								name: 'timeout',
-								type: 'number',
-								default: 30000,
-								description: 'Command timeout in milliseconds',
-							},
-						],
-					},
-				],
+				default: '',
+				placeholder: 'Enter commands, one per line:\nls -la\npwd\necho "Hello World"',
+				description: 'Commands to execute (one per line)',
 			},
 			{
 				displayName: 'Sudo Password',
@@ -219,9 +290,10 @@ export class SuperSsh implements INodeType {
 						operation: ['execute', 'executeSudo'],
 					},
 				},
-				default: '/',
-				required: true,
-				description: 'Working directory for the command',
+				default: '',
+				required: false,
+				placeholder: '/home/user or ~/ (leave empty for root)',
+				description: 'Working directory for the command (leave empty for root directory, use ~/ for home directory)',
 			},
 			{
 				displayName: 'Operation',
@@ -273,7 +345,7 @@ export class SuperSsh implements INodeType {
 						resource: ['file'],
 					},
 				},
-				placeholder: '',
+				placeholder: 'data',
 				hint: 'The name of the input binary field containing the file to be uploaded',
 			},
 			{
@@ -547,48 +619,113 @@ export class SuperSsh implements INodeType {
 		const returnItems: INodeExecutionData[] = [];
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
-		const credentials = await this.getCredentials('superSshCredentials');
+		const configMode = this.getNodeParameter('configMode', 0) as string;
 		const advancedOptions = this.getNodeParameter('advancedOptions', 0, {}) as IDataObject;
 
-		// Validate credentials
-		const authMethod = credentials.authMethod as string || 'password';
-		validateSshParams(
-			credentials.host as string,
-			credentials.username as string,
-			parseInt(credentials.port as string, 10),
-			authMethod,
-			credentials.password as string,
-			credentials.privateKey as string,
-		);
+		let sshConfig: any;
+		let connectionSummary: string;
 
-		// Build SSH configuration
-		const sshConfig = buildSshConfig(
-			credentials.host as string,
-			credentials.username as string,
-			parseInt(credentials.port as string, 10),
-			authMethod,
-			credentials.password as string,
-			credentials.privateKey as string,
-			credentials.passphrase as string,
-			credentials.securityOptions as any,
-			credentials.connectionOptions as any,
-		);
+		if (configMode === 'credentials') {
+			// Use stored credentials
+			const credentials = await this.getCredentials('superSshCredentials');
+			if (!credentials) {
+				throw new NodeOperationError(
+					this.getNode(),
+					'SSH credentials are required when using credentials mode',
+				);
+			}
+			const authMethod = credentials.authMethod as string || 'password';
+			
+			// Validate credentials
+			validateSshParams(
+				credentials.host as string,
+				credentials.username as string,
+				parseInt(credentials.port as string, 10),
+				authMethod,
+				credentials.password as string,
+				credentials.privateKey as string,
+			);
 
-		const ssh = new NodeSSH();
-
-		try {
-			// Connect to SSH server
-			await ssh.connect(sshConfig);
+			// Build SSH configuration
+			sshConfig = buildSshConfig(
+				credentials.host as string,
+				credentials.username as string,
+				parseInt(credentials.port as string, 10),
+				authMethod,
+				credentials.password as string,
+				credentials.privateKey as string,
+				credentials.passphrase as string,
+				credentials.securityOptions as any,
+				credentials.connectionOptions as any,
+			);
 
 			// Log connection
-			const connectionSummary = generateConnectionSummary(
+			connectionSummary = generateConnectionSummary(
 				credentials.host as string,
 				credentials.username as string,
 				parseInt(credentials.port as string, 10),
 				authMethod,
 				credentials.connectionType as string,
 			);
-			this.logger.info(connectionSummary);
+		} else {
+			// Use dynamic parameters
+			const dynamicHost = this.getNodeParameter('dynamicHost', 0) as string;
+			const dynamicPort = this.getNodeParameter('dynamicPort', 0) as number;
+			const dynamicUsername = this.getNodeParameter('dynamicUsername', 0) as string;
+			const dynamicPassword = this.getNodeParameter('dynamicPassword', 0) as string;
+			const dynamicPrivateKey = this.getNodeParameter('dynamicPrivateKey', 0) as string;
+
+			// Validate dynamic parameters
+			if (!dynamicHost || !dynamicUsername) {
+				throw new NodeOperationError(
+					this.getNode(),
+					'Dynamic host and username are required when using dynamic configuration mode',
+				);
+			}
+
+			// Determine authentication method
+			const authMethod = dynamicPrivateKey ? 'privateKey' : 'password';
+
+			// Validate dynamic parameters
+			validateSshParams(
+				dynamicHost,
+				dynamicUsername,
+				dynamicPort,
+				authMethod,
+				dynamicPassword,
+				dynamicPrivateKey,
+			);
+
+			// Build SSH configuration
+			sshConfig = buildSshConfig(
+				dynamicHost,
+				dynamicUsername,
+				dynamicPort,
+				authMethod,
+				dynamicPassword,
+				dynamicPrivateKey,
+				'', // No passphrase for dynamic keys
+				{}, // No security options for dynamic mode
+				{}, // No connection options for dynamic mode
+			);
+
+			// Log connection
+			connectionSummary = generateConnectionSummary(
+				dynamicHost,
+				dynamicUsername,
+				dynamicPort,
+				authMethod,
+				'dynamic',
+			);
+		}
+
+		this.logger.info(connectionSummary);
+
+		const ssh = new NodeSSH();
+
+		try {
+			// Connect to SSH server
+			await ssh.connect(sshConfig);
 
 			for (let i = 0; i < items.length; i++) {
 				try {
@@ -597,6 +734,15 @@ export class SuperSsh implements INodeType {
 					} else if (resource === 'file') {
 						await SuperSsh.handleFileOperations(this, ssh, i, operation, items, returnItems);
 					} else if (resource === 'networkDevice') {
+						// For network device operations, we need credentials object
+						const credentials = configMode === 'credentials' 
+							? await this.getCredentials('superSshCredentials')
+							: {
+								host: this.getNodeParameter('dynamicHost', i) as string,
+								username: this.getNodeParameter('dynamicUsername', i) as string,
+								port: this.getNodeParameter('dynamicPort', i) as number,
+								networkDeviceOptions: { deviceType: 'generic' }
+							};
 						await SuperSsh.handleNetworkDeviceOperations(this, ssh, i, operation, credentials, returnItems);
 					} else if (resource === 'systemInfo') {
 						await SuperSsh.handleSystemInfoOperations(this, ssh, i, operation, returnItems);
@@ -633,40 +779,76 @@ export class SuperSsh implements INodeType {
 	): Promise<void> {
 		if (operation === 'execute') {
 			const command = executeFunctions.getNodeParameter('command', itemIndex) as string;
-			const cwd = await resolveHomeDir.call(
-				executeFunctions,
-				executeFunctions.getNodeParameter('cwd', itemIndex) as string,
-				ssh,
-				itemIndex,
-			);
+			const cwdParam = executeFunctions.getNodeParameter('cwd', itemIndex) as string;
+			const parseOutput = executeFunctions.getNodeParameter('advancedOptions.parseOutput', itemIndex, true) as boolean;
+			
+			// Only resolve home directory if cwd is provided
+			let cwd = '/';
+			if (cwdParam && cwdParam.trim() !== '') {
+				cwd = await resolveHomeDir.call(
+					executeFunctions,
+					cwdParam,
+					ssh,
+					itemIndex,
+				);
+			}
 
 			const result = await ssh.execCommand(command, { cwd });
 			
-			const output = parseSshOutput(result.stdout);
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
 			output.command = command;
 			output.cwd = cwd;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
 				pairedItem: { item: itemIndex },
 			});
 		} else if (operation === 'executeMultiple') {
-			const commands = executeFunctions.getNodeParameter('commands', itemIndex) as IDataObject;
-			const commandItems = commands.commandItem as IDataObject[];
+			const commands = executeFunctions.getNodeParameter('commands', itemIndex) as string;
+			const commandItems = commands.split('\n').map(cmd => cmd.trim()).filter(cmd => cmd !== '');
+			const parseOutput = executeFunctions.getNodeParameter('advancedOptions.parseOutput', itemIndex, true) as boolean;
 			const results = [];
 
-			for (const cmdItem of commandItems) {
-				const command = cmdItem.command as string;
-				const cwd = cmdItem.cwd as string || '/';
+			executeFunctions.logger.info(`Executing ${commandItems.length} commands in sequence`);
 
+			for (const command of commandItems) {
+				// No cwd for multiple commands - use default
+				const cwd = '/';
+				
+				executeFunctions.logger.debug(`Executing command: ${command}`);
 				const result = await ssh.execCommand(command, { cwd });
-				const output = parseSshOutput(result.stdout);
+				
+				let output: any;
+				if (parseOutput) {
+					output = parseSshOutput(result.stdout);
+				} else {
+					output = {
+						raw: result.stdout,
+						lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+						wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+						hasError: false,
+					};
+				}
+				
 				output.stderr = result.stderr;
 				output.exitCode = result.code || 0;
 				output.command = command;
 				output.cwd = cwd;
+				output.parseOutput = parseOutput;
 
 				results.push(output);
 			}
@@ -677,23 +859,42 @@ export class SuperSsh implements INodeType {
 			});
 		} else if (operation === 'executeSudo') {
 			const command = executeFunctions.getNodeParameter('command', itemIndex) as string;
-			const cwd = await resolveHomeDir.call(
-				executeFunctions,
-				executeFunctions.getNodeParameter('cwd', itemIndex) as string,
-				ssh,
-				itemIndex,
-			);
+			const cwdParam = executeFunctions.getNodeParameter('cwd', itemIndex) as string;
 			const sudoPassword = executeFunctions.getNodeParameter('sudoPassword', itemIndex) as string;
-
+			const parseOutput = executeFunctions.getNodeParameter('advancedOptions.parseOutput', itemIndex, true) as boolean;
+			
+			// Only resolve home directory if cwd is provided
+			let cwd = '/';
+			if (cwdParam && cwdParam.trim() !== '') {
+				cwd = await resolveHomeDir.call(
+					executeFunctions,
+					cwdParam,
+					ssh,
+					itemIndex,
+				);
+			}
+			
 			const sudoCommand = `echo '${sudoPassword}' | sudo -S ${command}`;
 			const result = await ssh.execCommand(sudoCommand, { cwd });
 			
-			const output = parseSshOutput(result.stdout);
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
 			output.command = command;
 			output.cwd = cwd;
 			output.sudo = true;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -710,6 +911,11 @@ export class SuperSsh implements INodeType {
 		items: INodeExecutionData[],
 		returnItems: INodeExecutionData[],
 	): Promise<void> {
+		const parseOutput = executeFunctions.getNodeParameter('advancedOptions.parseOutput', itemIndex, true) as boolean;
+		
+		// Ensure parseOutput is always a boolean
+		const shouldParseOutput = typeof parseOutput === 'boolean' ? parseOutput : true;
+
 		if (operation === 'upload') {
 			const remotePath = await resolveHomeDir.call(
 				executeFunctions,
@@ -755,6 +961,12 @@ export class SuperSsh implements INodeType {
 				}
 				
 				await ssh.putFile(tempPath, finalPath);
+			} catch (error: any) {
+				throw new NodeOperationError(
+					executeFunctions.getNode(),
+					`File upload failed: ${error.message}`,
+					{ itemIndex },
+				);
 			} finally {
 				await cleanup();
 			}
@@ -764,6 +976,7 @@ export class SuperSsh implements INodeType {
 					success: true,
 					path: finalPath,
 					message: 'File uploaded successfully',
+					parseOutput: shouldParseOutput,
 				},
 				pairedItem: { item: itemIndex },
 			});
@@ -809,6 +1022,7 @@ export class SuperSsh implements INodeType {
 					success: true,
 					path: remotePath,
 					message: 'File downloaded successfully',
+					parseOutput: shouldParseOutput,
 				},
 				binary: items[itemIndex].binary,
 				pairedItem: { item: itemIndex },
@@ -822,10 +1036,23 @@ export class SuperSsh implements INodeType {
 			);
 
 			const result = await ssh.execCommand(`ls -la "${path}"`);
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (shouldParseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
 			output.path = path;
+			output.parseOutput = shouldParseOutput;
 
 			returnItems.push({
 				json: output,
@@ -847,6 +1074,7 @@ export class SuperSsh implements INodeType {
 					deletedPath: path,
 					stderr: result.stderr,
 					exitCode: result.code,
+					parseOutput: shouldParseOutput,
 				},
 				pairedItem: { item: itemIndex },
 			});
@@ -863,13 +1091,27 @@ export class SuperSsh implements INodeType {
 	): Promise<void> {
 		const deviceType = (credentials.networkDeviceOptions as IDataObject)?.deviceType || 'generic';
 		const commands = getNetworkDeviceCommands(deviceType as string);
+		const parseOutput = executeFunctions.getNodeParameter('advancedOptions.parseOutput', itemIndex, true) as boolean;
 
 		if (operation === 'getVersion') {
 			const result = await ssh.execCommand(commands.showVersion);
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
 			output.deviceType = deviceType as string;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -877,10 +1119,23 @@ export class SuperSsh implements INodeType {
 			});
 		} else if (operation === 'getRunningConfig') {
 			const result = await ssh.execCommand(commands.showRunning);
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
 			output.deviceType = deviceType as string;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -888,10 +1143,23 @@ export class SuperSsh implements INodeType {
 			});
 		} else if (operation === 'getInterfaces') {
 			const result = await ssh.execCommand(commands.showInterfaces);
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
 			output.deviceType = deviceType as string;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -900,11 +1168,24 @@ export class SuperSsh implements INodeType {
 		} else if (operation === 'customCommand') {
 			const command = executeFunctions.getNodeParameter('customNetworkCommand', itemIndex) as string;
 			const result = await ssh.execCommand(command);
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
 			output.command = command;
 			output.deviceType = deviceType as string;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -920,11 +1201,26 @@ export class SuperSsh implements INodeType {
 		operation: string,
 		returnItems: INodeExecutionData[],
 	): Promise<void> {
+		const parseOutput = executeFunctions.getNodeParameter('advancedOptions.parseOutput', itemIndex, true) as boolean;
+		
 		if (operation === 'getSystemInfo') {
 			const result = await ssh.execCommand('uname -a');
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -932,9 +1228,22 @@ export class SuperSsh implements INodeType {
 			});
 		} else if (operation === 'getDiskUsage') {
 			const result = await ssh.execCommand('df -h');
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -942,9 +1251,22 @@ export class SuperSsh implements INodeType {
 			});
 		} else if (operation === 'getMemoryInfo') {
 			const result = await ssh.execCommand('free -h');
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,
@@ -952,9 +1274,22 @@ export class SuperSsh implements INodeType {
 			});
 		} else if (operation === 'getProcessInfo') {
 			const result = await ssh.execCommand('ps aux');
-			const output = parseSshOutput(result.stdout);
+			
+			let output: any;
+			if (parseOutput) {
+				output = parseSshOutput(result.stdout);
+			} else {
+				output = {
+					raw: result.stdout,
+					lines: result.stdout.split('\n').filter(line => line.trim() !== ''),
+					wordCount: result.stdout.split(/\s+/).filter(word => word.trim() !== '').length,
+					hasError: false,
+				};
+			}
+			
 			output.stderr = result.stderr;
 			output.exitCode = result.code || 0;
+			output.parseOutput = parseOutput;
 
 			returnItems.push({
 				json: output,

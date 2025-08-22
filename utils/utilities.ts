@@ -1,4 +1,3 @@
-import type { Config } from 'node-ssh';
 import type { IDataObject, GenericValue } from 'n8n-workflow';
 
 // Define proper interfaces for better type safety
@@ -42,8 +41,8 @@ export function buildSshConfig(
 	passphrase?: string,
 	securityOptions?: SecurityOptions,
 	connectionOptions?: ConnectionOptions,
-): Config {
-	const config: Config = {
+): any {
+	const config: any = {
 		host,
 		username,
 		port,
@@ -103,6 +102,8 @@ export function validateSshParams(
 
 	if (!host || host.trim() === '') {
 		errors.push('Host is required');
+	} else if (!/^[a-zA-Z0-9.-]+$/.test(host) && !/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(host)) {
+		errors.push('Host must be a valid hostname or IP address');
 	}
 
 	if (!username || username.trim() === '') {
@@ -149,7 +150,8 @@ export function getNetworkDeviceCommands(deviceType: string): Record<string, str
 		},
 	};
 
-	return commands[deviceType] || commands.generic;
+	// Return commands for the specified device type, fallback to generic if not found
+	return commands[deviceType.toLowerCase()] || commands.generic;
 }
 
 // Define interface for parsed output
@@ -177,15 +179,23 @@ export function parseSshOutput(output: string): ParsedOutput {
 	const result: ParsedOutput = {
 		raw: output,
 		lines: output.split('\n').filter(line => line.trim() !== ''),
-		wordCount: output.split(/\s+/).length,
+		wordCount: output.split(/\s+/).filter(word => word.trim() !== '').length,
 		hasError: output.toLowerCase().includes('error') || output.toLowerCase().includes('failed'),
 	};
 
-	// Try to detect JSON output
+	// Try to detect JSON output - look for JSON at the beginning or end of output
 	try {
-		const jsonMatch = output.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-		if (jsonMatch) {
-			result.json = JSON.parse(jsonMatch[0]);
+		const trimmedOutput = output.trim();
+		// Check if entire output is JSON
+		if ((trimmedOutput.startsWith('{') && trimmedOutput.endsWith('}')) ||
+			(trimmedOutput.startsWith('[') && trimmedOutput.endsWith(']'))) {
+			result.json = JSON.parse(trimmedOutput);
+		} else {
+			// Look for JSON patterns within the output
+			const jsonMatch = output.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+			if (jsonMatch) {
+				result.json = JSON.parse(jsonMatch[0]);
+			}
 		}
 	} catch (e) {
 		// Not valid JSON, continue with text parsing
