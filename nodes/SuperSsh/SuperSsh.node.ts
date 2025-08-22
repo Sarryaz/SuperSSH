@@ -1,4 +1,3 @@
-import { writeFile } from 'fs/promises';
 import type {
 	ICredentialTestFunctions,
 	ICredentialsDecrypted,
@@ -10,10 +9,10 @@ import type {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 import { BINARY_ENCODING, NodeOperationError } from 'n8n-workflow';
-import type { Config } from 'node-ssh';
 import { NodeSSH } from 'node-ssh';
 import type { Readable } from 'stream';
 import { file as tmpFile } from 'tmp-promise';
+import { writeFile } from 'fs/promises';
 
 import {
 	buildSshConfig,
@@ -66,8 +65,8 @@ export class SuperSsh implements INodeType {
 			name: 'Super SSH',
 			color: '#0066cc',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: ['main' as any],
+		outputs: ['main' as any],
 		credentials: [
 			{
 				name: 'superSshCredentials',
@@ -487,8 +486,8 @@ export class SuperSsh implements INodeType {
 					const errors = validateSshParams(
 						credentials.host as string,
 						credentials.username as string,
-						credentials.port as number,
-						credentials.authMethod as string,
+						parseInt(credentials.port as string, 10),
+						credentials.authMethod as string || 'password',
 						credentials.password as string,
 						credentials.privateKey as string,
 					);
@@ -504,8 +503,8 @@ export class SuperSsh implements INodeType {
 					const config = buildSshConfig(
 						credentials.host as string,
 						credentials.username as string,
-						credentials.port as number,
-						credentials.authMethod as string,
+						parseInt(credentials.port as string, 10),
+						credentials.authMethod as string || 'password',
 						credentials.password as string,
 						credentials.privateKey as string,
 						credentials.passphrase as string,
@@ -546,37 +545,28 @@ export class SuperSsh implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnItems: INodeExecutionData[] = [];
-
-		const resource = this.getNodeParameter('resource', 0);
-		const operation = this.getNodeParameter('operation', 0);
+		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0) as string;
+		const credentials = await this.getCredentials('superSshCredentials');
 		const advancedOptions = this.getNodeParameter('advancedOptions', 0, {}) as IDataObject;
 
-		// Get credentials
-		const credentials = await this.getCredentials('superSshCredentials');
-		
 		// Validate credentials
-		const errors = validateSshParams(
+		const authMethod = credentials.authMethod as string || 'password';
+		validateSshParams(
 			credentials.host as string,
 			credentials.username as string,
-			credentials.port as number,
-			credentials.authMethod as string,
+			parseInt(credentials.port as string, 10),
+			authMethod,
 			credentials.password as string,
 			credentials.privateKey as string,
 		);
-
-		if (errors.length > 0) {
-			throw new NodeOperationError(
-				this.getNode(),
-				`Credential validation failed: ${errors.join(', ')}`,
-			);
-		}
 
 		// Build SSH configuration
 		const sshConfig = buildSshConfig(
 			credentials.host as string,
 			credentials.username as string,
-			credentials.port as number,
-			credentials.authMethod as string,
+			parseInt(credentials.port as string, 10),
+			authMethod,
 			credentials.password as string,
 			credentials.privateKey as string,
 			credentials.passphrase as string,
@@ -594,8 +584,8 @@ export class SuperSsh implements INodeType {
 			const connectionSummary = generateConnectionSummary(
 				credentials.host as string,
 				credentials.username as string,
-				credentials.port as number,
-				credentials.authMethod as string,
+				parseInt(credentials.port as string, 10),
+				authMethod,
 				credentials.connectionType as string,
 			);
 			this.logger.info(connectionSummary);
@@ -603,13 +593,13 @@ export class SuperSsh implements INodeType {
 			for (let i = 0; i < items.length; i++) {
 				try {
 					if (resource === 'command') {
-						await this.handleCommandExecution(ssh, i, operation, returnItems);
+						await SuperSsh.handleCommandExecution(this, ssh, i, operation, returnItems);
 					} else if (resource === 'file') {
-						await this.handleFileOperations(ssh, i, operation, items, returnItems);
+						await SuperSsh.handleFileOperations(this, ssh, i, operation, items, returnItems);
 					} else if (resource === 'networkDevice') {
-						await this.handleNetworkDeviceOperations(ssh, i, operation, credentials, returnItems);
+						await SuperSsh.handleNetworkDeviceOperations(this, ssh, i, operation, credentials, returnItems);
 					} else if (resource === 'systemInfo') {
-						await this.handleSystemInfoOperations(ssh, i, operation, returnItems);
+						await SuperSsh.handleSystemInfoOperations(this, ssh, i, operation, returnItems);
 					}
 				} catch (error: any) {
 					if (advancedOptions.continueOnError) {
@@ -634,27 +624,27 @@ export class SuperSsh implements INodeType {
 		return [returnItems];
 	}
 
-	private async handleCommandExecution(
+	private static async handleCommandExecution(
+		executeFunctions: IExecuteFunctions,
 		ssh: NodeSSH,
 		itemIndex: number,
 		operation: string,
 		returnItems: INodeExecutionData[],
 	): Promise<void> {
 		if (operation === 'execute') {
-			const command = this.getNodeParameter('command', itemIndex) as string;
+			const command = executeFunctions.getNodeParameter('command', itemIndex) as string;
 			const cwd = await resolveHomeDir.call(
-				this,
-				this.getNodeParameter('cwd', itemIndex) as string,
+				executeFunctions,
+				executeFunctions.getNodeParameter('cwd', itemIndex) as string,
 				ssh,
 				itemIndex,
 			);
-			const timeout = this.getNodeParameter('advancedOptions.commandTimeout', itemIndex, 30000) as number;
 
-			const result = await ssh.execCommand(command, { cwd, timeout });
+			const result = await ssh.execCommand(command, { cwd });
 			
 			const output = parseSshOutput(result.stdout);
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
 			output.command = command;
 			output.cwd = cwd;
 
@@ -663,19 +653,18 @@ export class SuperSsh implements INodeType {
 				pairedItem: { item: itemIndex },
 			});
 		} else if (operation === 'executeMultiple') {
-			const commands = this.getNodeParameter('commands', itemIndex) as IDataObject;
+			const commands = executeFunctions.getNodeParameter('commands', itemIndex) as IDataObject;
 			const commandItems = commands.commandItem as IDataObject[];
 			const results = [];
 
 			for (const cmdItem of commandItems) {
 				const command = cmdItem.command as string;
 				const cwd = cmdItem.cwd as string || '/';
-				const timeout = cmdItem.timeout as number || 30000;
 
-				const result = await ssh.execCommand(command, { cwd, timeout });
+				const result = await ssh.execCommand(command, { cwd });
 				const output = parseSshOutput(result.stdout);
 				output.stderr = result.stderr;
-				output.exitCode = result.code;
+				output.exitCode = result.code || 0;
 				output.command = command;
 				output.cwd = cwd;
 
@@ -687,23 +676,21 @@ export class SuperSsh implements INodeType {
 				pairedItem: { item: itemIndex },
 			});
 		} else if (operation === 'executeSudo') {
-			const command = this.getNodeParameter('command', itemIndex) as string;
+			const command = executeFunctions.getNodeParameter('command', itemIndex) as string;
 			const cwd = await resolveHomeDir.call(
-				this,
-				this.getNodeParameter('cwd', itemIndex) as string,
+				executeFunctions,
+				executeFunctions.getNodeParameter('cwd', itemIndex) as string,
 				ssh,
 				itemIndex,
 			);
-			const sudoPassword = this.getNodeParameter('sudoPassword', itemIndex) as string;
-			const timeout = this.getNodeParameter('advancedOptions.commandTimeout', itemIndex, 30000) as number;
+			const sudoPassword = executeFunctions.getNodeParameter('sudoPassword', itemIndex) as string;
 
-			// Execute sudo command
 			const sudoCommand = `echo '${sudoPassword}' | sudo -S ${command}`;
-			const result = await ssh.execCommand(sudoCommand, { cwd, timeout });
-
+			const result = await ssh.execCommand(sudoCommand, { cwd });
+			
 			const output = parseSshOutput(result.stdout);
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
 			output.command = command;
 			output.cwd = cwd;
 			output.sudo = true;
@@ -715,7 +702,8 @@ export class SuperSsh implements INodeType {
 		}
 	}
 
-	private async handleFileOperations(
+	private static async handleFileOperations(
+		executeFunctions: IExecuteFunctions,
 		ssh: NodeSSH,
 		itemIndex: number,
 		operation: string,
@@ -723,94 +711,121 @@ export class SuperSsh implements INodeType {
 		returnItems: INodeExecutionData[],
 	): Promise<void> {
 		if (operation === 'upload') {
-			const path = await resolveHomeDir.call(
-				this,
-				this.getNodeParameter('path', itemIndex) as string,
+			const remotePath = await resolveHomeDir.call(
+				executeFunctions,
+				executeFunctions.getNodeParameter('path', itemIndex) as string,
 				ssh,
 				itemIndex,
 			);
-			const fileName = this.getNodeParameter('options.fileName', itemIndex, '') as string;
-			const binaryPropertyName = this.getNodeParameter('binaryPropertyName', itemIndex);
-			const preservePermissions = this.getNodeParameter('options.preservePermissions', itemIndex, true) as boolean;
+			const fileName = executeFunctions.getNodeParameter('options.fileName', itemIndex, '') as string;
+			const binaryPropertyName = executeFunctions.getNodeParameter('binaryPropertyName', itemIndex);
 
-			const binaryData = this.helpers.assertBinaryData(itemIndex, binaryPropertyName);
-			
+			if (!binaryPropertyName) {
+				throw new NodeOperationError(
+					executeFunctions.getNode(),
+					'Binary property name is required for file upload',
+					{ itemIndex },
+				);
+			}
+
+			const binaryData = executeFunctions.helpers.assertBinaryData(itemIndex, binaryPropertyName);
 			let uploadData: Buffer | Readable;
+
 			if (binaryData.id) {
-				uploadData = await this.helpers.getBinaryStream(binaryData.id);
+				uploadData = await executeFunctions.helpers.getBinaryStream(binaryData.id);
 			} else {
 				uploadData = Buffer.from(binaryData.data, BINARY_ENCODING);
 			}
 
-			const binaryFile = await tmpFile({ prefix: 'n8n-ssh-' });
+			const finalPath = fileName ? `${remotePath}/${fileName}` : remotePath;
 
+			// Create a temporary file for upload
+			const { path: tempPath, cleanup } = await tmpFile();
 			try {
-				await writeFile(binaryFile.path, uploadData);
+				if (uploadData instanceof Buffer) {
+					await writeFile(tempPath, uploadData);
+				} else if ('pipe' in uploadData) {
+					// Handle stream upload - only if it's a Readable stream
+					const writeStream = require('fs').createWriteStream(tempPath);
+					uploadData.pipe(writeStream);
+					await new Promise((resolve, reject) => {
+						writeStream.on('finish', resolve);
+						writeStream.on('error', reject);
+					});
+				}
 				
-				await ssh.putFile(
-					binaryFile.path,
-					`${path}${
-						path.charAt(path.length - 1) === '/' ? '' : '/'
-					}${fileName || binaryData.fileName}`,
-				);
-
-				returnItems.push({
-					json: {
-						success: true,
-						uploadedFile: `${path}/${fileName || binaryData.fileName}`,
-						fileSize: uploadData instanceof Buffer ? uploadData.length : 'stream',
-					},
-					pairedItem: { item: itemIndex },
-				});
+				await ssh.putFile(tempPath, finalPath);
 			} finally {
-				await binaryFile.cleanup();
+				await cleanup();
 			}
+
+			returnItems.push({
+				json: {
+					success: true,
+					path: finalPath,
+					message: 'File uploaded successfully',
+				},
+				pairedItem: { item: itemIndex },
+			});
 		} else if (operation === 'download') {
-			const path = await resolveHomeDir.call(
-				this,
-				this.getNodeParameter('path', itemIndex) as string,
+			const remotePath = await resolveHomeDir.call(
+				executeFunctions,
+				executeFunctions.getNodeParameter('path', itemIndex) as string,
 				ssh,
 				itemIndex,
 			);
-			const binaryPropertyName = this.getNodeParameter('binaryPropertyName', itemIndex);
+			const binaryPropertyName = executeFunctions.getNodeParameter('binaryPropertyName', itemIndex);
 
-			const binaryFile = await tmpFile({ prefix: 'n8n-ssh-' });
-
-			try {
-				await ssh.getFile(binaryFile.path, path);
-				
-				const newItem: INodeExecutionData = {
-					json: items[itemIndex].json,
-					binary: {},
-					pairedItem: { item: itemIndex },
-				};
-
-				if (items[itemIndex].binary !== undefined && newItem.binary) {
-					Object.assign(newItem.binary, items[itemIndex].binary);
-				}
-
-				items[itemIndex] = newItem;
-
-				items[itemIndex].binary![binaryPropertyName] = await this.nodeHelpers.copyBinaryFile(
-					binaryFile.path,
-					path.split('/').pop() || 'downloaded_file',
+			if (!binaryPropertyName) {
+				throw new NodeOperationError(
+					executeFunctions.getNode(),
+					'Binary property name is required for file download',
+					{ itemIndex },
 				);
-			} finally {
-				await binaryFile.cleanup();
 			}
+
+			const { path: tempPath, cleanup } = await tmpFile();
+			try {
+				await ssh.getFile(tempPath, remotePath);
+				
+				// Read the file content
+				const fs = require('fs');
+				const fileContent = fs.readFileSync(tempPath);
+				
+				// Create binary data
+				const binaryData = await executeFunctions.helpers.prepareBinaryData(fileContent, remotePath.split('/').pop() || 'downloaded_file');
+				
+				// Add to items
+				if (!items[itemIndex].binary) {
+					items[itemIndex].binary = {};
+				}
+				items[itemIndex].binary![binaryPropertyName] = binaryData;
+			} finally {
+				await cleanup();
+			}
+
+			returnItems.push({
+				json: {
+					success: true,
+					path: remotePath,
+					message: 'File downloaded successfully',
+				},
+				binary: items[itemIndex].binary,
+				pairedItem: { item: itemIndex },
+			});
 		} else if (operation === 'list') {
 			const path = await resolveHomeDir.call(
-				this,
-				this.getNodeParameter('path', itemIndex) as string,
+				executeFunctions,
+				executeFunctions.getNodeParameter('path', itemIndex) as string,
 				ssh,
 				itemIndex,
 			);
 
 			const result = await ssh.execCommand(`ls -la "${path}"`);
 			const output = parseSshOutput(result.stdout);
-			output.path = path;
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
+			output.path = path;
 
 			returnItems.push({
 				json: output,
@@ -818,8 +833,8 @@ export class SuperSsh implements INodeType {
 			});
 		} else if (operation === 'delete') {
 			const path = await resolveHomeDir.call(
-				this,
-				this.getNodeParameter('path', itemIndex) as string,
+				executeFunctions,
+				executeFunctions.getNodeParameter('path', itemIndex) as string,
 				ssh,
 				itemIndex,
 			);
@@ -838,35 +853,34 @@ export class SuperSsh implements INodeType {
 		}
 	}
 
-	private async handleNetworkDeviceOperations(
+	private static async handleNetworkDeviceOperations(
+		executeFunctions: IExecuteFunctions,
 		ssh: NodeSSH,
 		itemIndex: number,
 		operation: string,
 		credentials: IDataObject,
 		returnItems: INodeExecutionData[],
 	): Promise<void> {
-		const deviceType = credentials.networkDeviceOptions?.deviceType || 'generic';
-		const commands = getNetworkDeviceCommands(deviceType);
+		const deviceType = (credentials.networkDeviceOptions as IDataObject)?.deviceType || 'generic';
+		const commands = getNetworkDeviceCommands(deviceType as string);
 
-		if (operation === 'getInfo') {
+		if (operation === 'getVersion') {
 			const result = await ssh.execCommand(commands.showVersion);
 			const output = parseSshOutput(result.stdout);
-			output.deviceType = deviceType;
-			output.command = commands.showVersion;
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
+			output.deviceType = deviceType as string;
 
 			returnItems.push({
 				json: output,
 				pairedItem: { item: itemIndex },
 			});
-		} else if (operation === 'getConfig') {
+		} else if (operation === 'getRunningConfig') {
 			const result = await ssh.execCommand(commands.showRunning);
 			const output = parseSshOutput(result.stdout);
-			output.deviceType = deviceType;
-			output.command = commands.showRunning;
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
+			output.deviceType = deviceType as string;
 
 			returnItems.push({
 				json: output,
@@ -875,23 +889,22 @@ export class SuperSsh implements INodeType {
 		} else if (operation === 'getInterfaces') {
 			const result = await ssh.execCommand(commands.showInterfaces);
 			const output = parseSshOutput(result.stdout);
-			output.deviceType = deviceType;
-			output.command = commands.showInterfaces;
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
+			output.deviceType = deviceType as string;
 
 			returnItems.push({
 				json: output,
 				pairedItem: { item: itemIndex },
 			});
 		} else if (operation === 'customCommand') {
-			const command = this.getNodeParameter('customNetworkCommand', itemIndex) as string;
+			const command = executeFunctions.getNodeParameter('customNetworkCommand', itemIndex) as string;
 			const result = await ssh.execCommand(command);
 			const output = parseSshOutput(result.stdout);
-			output.deviceType = deviceType;
-			output.command = command;
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
+			output.command = command;
+			output.deviceType = deviceType as string;
 
 			returnItems.push({
 				json: output,
@@ -900,63 +913,48 @@ export class SuperSsh implements INodeType {
 		}
 	}
 
-	private async handleSystemInfoOperations(
+	private static async handleSystemInfoOperations(
+		executeFunctions: IExecuteFunctions,
 		ssh: NodeSSH,
 		itemIndex: number,
 		operation: string,
 		returnItems: INodeExecutionData[],
 	): Promise<void> {
-		if (operation === 'overview') {
-			const commands = [
-				'uname -a',
-				'cat /etc/os-release',
-				'uptime',
-				'free -h',
-				'df -h',
-			];
-
-			const results = [];
-			for (const command of commands) {
-				const result = await ssh.execCommand(command);
-				const output = parseSshOutput(result.stdout);
-				output.command = command;
-				output.stderr = result.stderr;
-				output.exitCode = result.code;
-				results.push(output);
-			}
-
-			returnItems.push({
-				json: { systemOverview: results },
-				pairedItem: { item: itemIndex },
-			});
-		} else if (operation === 'processes') {
-			const result = await ssh.execCommand('ps aux');
+		if (operation === 'getSystemInfo') {
+			const result = await ssh.execCommand('uname -a');
 			const output = parseSshOutput(result.stdout);
-			output.command = 'ps aux';
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
 
 			returnItems.push({
 				json: output,
 				pairedItem: { item: itemIndex },
 			});
-		} else if (operation === 'diskUsage') {
+		} else if (operation === 'getDiskUsage') {
 			const result = await ssh.execCommand('df -h');
 			const output = parseSshOutput(result.stdout);
-			output.command = 'df -h';
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
 
 			returnItems.push({
 				json: output,
 				pairedItem: { item: itemIndex },
 			});
-		} else if (operation === 'networkInterfaces') {
-			const result = await ssh.execCommand('ip addr show');
+		} else if (operation === 'getMemoryInfo') {
+			const result = await ssh.execCommand('free -h');
 			const output = parseSshOutput(result.stdout);
-			output.command = 'ip addr show';
 			output.stderr = result.stderr;
-			output.exitCode = result.code;
+			output.exitCode = result.code || 0;
+
+			returnItems.push({
+				json: output,
+				pairedItem: { item: itemIndex },
+			});
+		} else if (operation === 'getProcessInfo') {
+			const result = await ssh.execCommand('ps aux');
+			const output = parseSshOutput(result.stdout);
+			output.stderr = result.stderr;
+			output.exitCode = result.code || 0;
 
 			returnItems.push({
 				json: output,

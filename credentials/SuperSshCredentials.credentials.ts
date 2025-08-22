@@ -14,6 +14,11 @@ export class SuperSshCredentials implements ICredentialType {
 			type: 'options',
 			options: [
 				{
+					name: 'Custom',
+					value: 'custom',
+					description: 'Custom credentials with username and password fields',
+				},
+				{
 					name: 'Standard SSH',
 					value: 'standard',
 					description: 'Standard SSH connection with basic security',
@@ -29,7 +34,7 @@ export class SuperSshCredentials implements ICredentialType {
 					description: 'Specialized connection for Cisco and Aruba network devices',
 				},
 			],
-			default: 'standard',
+			default: 'custom',
 		},
 		{
 			displayName: 'Host',
@@ -60,6 +65,11 @@ export class SuperSshCredentials implements ICredentialType {
 			displayName: 'Authentication Method',
 			name: 'authMethod',
 			type: 'options',
+			displayOptions: {
+				show: {
+					connectionType: ['standard', 'enhanced', 'networkDevice'],
+				},
+			},
 			options: [
 				{
 					name: 'Password',
@@ -87,11 +97,6 @@ export class SuperSshCredentials implements ICredentialType {
 				password: true,
 			},
 			default: '',
-			displayOptions: {
-				show: {
-					authMethod: ['password'],
-				},
-			},
 			description: 'Password to use for authentication',
 		},
 		{

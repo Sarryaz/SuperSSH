@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-superssh",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Enhanced n8n SSH node with advanced credential management and specialized support for Cisco and Aruba network devices",
   "keywords": [
     "n8n-community-node-package",
@@ -29,13 +29,10 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "tsc && gulp build",
+    "build": "tsc && npm run copy-files",
     "dev": "tsc --watch",
-    "format": "prettier nodes credentials utils --write",
-    "lint": "eslint nodes credentials utils package.json",
-    "lintfix": "eslint nodes credentials utils package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint",
-    "postpack": "rm -f *.tgz"
+    "prepublishOnly": "npm run build",
+    "copy-files": "node scripts/copy-files.js"
   },
   "files": [
     "dist",
@@ -57,13 +54,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
-    "@typescript-eslint/parser": "^7.15.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-n8n-nodes-base": "^1.16.1",
-    "gulp": "^4.0.2",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3",
-    "@n8n/nodes-base": "^1.16.1"
+    "typescript": "^5.5.3"
   },
   "dependencies": {
     "node-ssh": "^13.1.0",

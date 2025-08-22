@@ -1,4 +1,5 @@
 import type { Config } from 'node-ssh';
+import type { IDataObject, GenericValue } from 'n8n-workflow';
 
 // Define proper interfaces for better type safety
 interface SecurityOptions {
@@ -152,12 +153,12 @@ export function getNetworkDeviceCommands(deviceType: string): Record<string, str
 }
 
 // Define interface for parsed output
-interface ParsedOutput {
+interface ParsedOutput extends IDataObject {
 	raw: string;
 	lines: string[];
 	wordCount: number;
 	hasError: boolean;
-	json?: unknown;
+	json?: IDataObject | GenericValue | GenericValue[] | IDataObject[];
 	table?: string[][];
 	// Additional properties for command execution
 	stderr?: string;
@@ -194,7 +195,6 @@ export function parseSshOutput(output: string): ParsedOutput {
 	const lines = output.split('\n');
 	if (lines.length > 2) {
 		const firstLine = lines[0];
-		const secondLine = lines[1];
 		
 		// Check if it looks like a table (has separators like | or multiple spaces)
 		if (firstLine.includes('|') || /\s{2,}/.test(firstLine)) {
