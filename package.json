@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-ssh-nexus",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "🚀 SSH Nexus - The ultimate SSH automation hub for n8n! Features intelligent connection health monitoring, smart network discovery tools, advanced security auditing, performance benchmarking, and comprehensive device support. Built with ❤️ by Sarryaz for the automation community!",
 	"keywords": [
 		"n8n",
