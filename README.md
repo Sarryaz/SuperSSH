@@ -1,197 +1,263 @@
-# SuperSSH - Enhanced n8n SSH Node
+# SSH Nexus - The Ultimate SSH Automation Hub for n8n
 
-A powerful and feature-rich SSH node for n8n with enhanced credential management, advanced security options, and specialized support for Cisco and Aruba network devices.
+> *"May the SSH be with you!"*
 
-## 🚀 Features
+SSH Nexus is the most advanced and feature-rich SSH node for n8n, designed for network automation, system administration, and intelligent remote operations. Built with ❤️ by Sarryaz for the automation community!
 
-* **Custom Credentials**: Simple username/password fields that are always visible (similar to n8n-nodes-customssh)
-* **Dynamic Parameters**: Use different servers in the same workflow, pass credentials from previous nodes, or use environment variables
-* **Enhanced Credential Management**: Unified credential system with multiple authentication methods
-* **Advanced Security Options**: Configurable ciphers, key exchange algorithms, and MAC algorithms
-* **Network Device Support**: Specialized configurations for Cisco and Aruba network devices
-* **Comprehensive Operations**: Command execution, file operations, system information, and network device management
-* **Type Safety**: Full TypeScript implementation with proper interfaces
+## What Makes SSH Nexus Special?
 
-## 📦 Installation
+SSH Nexus goes beyond basic SSH functionality with **intelligent features** that make network automation a breeze:
+- **Connection Health Monitoring** - Real-time connection quality analysis
+- **Smart Network Discovery** - Intelligent topology discovery and device detection  
+- **Security Auditing** - Automated security configuration analysis
+- **Performance Benchmarking** - System and network performance testing
+- **AI-Optimized** - Built for seamless AI agent integration
 
-### Prerequisites
+## Unique Features
 
-* Node.js 18.10 or higher
-* n8n instance (self-hosted)
+### Connection Health Monitoring
+- **Health Check**: Comprehensive connection analysis with health scoring
+- **Latency Testing**: Real-time latency and jitter measurement with quality assessment
+- **Throughput Testing**: Data transfer performance analysis
 
-### Install via npm
+### Smart Tools
+- **Network Discovery**: Intelligent network topology discovery using ping and ARP
+- **Port Scanner**: Smart port scanning with service detection
+- **Performance Benchmark**: System performance testing (CPU, Memory, Disk, Network)
+- **Security Audit**: Automated security configuration analysis with findings
 
-```bash
-# Install directly in your n8n installation
-npm install n8n-nodes-superssh
-```
+## 📋 Core Features
 
-### Install via n8n Community Nodes
+### Core SSH Operations
+- **Command Execution**: Execute single commands with sudo support
+- **Multiple Commands**: Execute multiple commands in sequence with configurable wait times
+- **Command List Execution**: AI-friendly command list execution from text input
+- **File Operations**: Upload, download, list, and delete files
+- **System Information**: Get system overview, processes, disk usage, and memory info
 
-1. Go to **Settings** > **Community Nodes** in your n8n instance
-2. Click **Install a community node**
-3. Enter `n8n-nodes-superssh`
-4. Click **Install**
-5. Restart n8n
+### Network Device Support
+- **Device Information**: Get version, running configuration, startup configuration
+- **Configuration Management**: Backup and restore device configurations with text or binary input
+- **Configuration Options**: Support for running vs startup configs, merge vs replace operations
+- **Interface Information**: Get network interface details
+- **Custom Commands**: Execute device-specific commands
+- **Privilege Escalation**: Support for enable mode with password
 
-### Manual Installation
+### Enhanced Security & Compatibility
+- **Cipher Selection**: All available ciphers, secure-only, legacy-only, or specific ciphers
+- **Advanced Security Options**: Compatibility levels, security levels, legacy algorithm support
+- **Key Exchange Algorithms**: Configurable KEX algorithms with compatibility presets
+- **HMAC Algorithms**: Configurable MAC algorithms with security level presets
+- **Host Key Algorithms**: Configurable server host key algorithms
 
-```bash
-# Clone and build the project
-git clone https://github.com/Sarryaz/SuperSSH.git
-cd SuperSSH
-npm install
-npm run build
+### Dynamic Parameters
+- **Dynamic Hosts**: Use different servers in the same workflow
+- **Dynamic Credentials**: Pass credentials from previous nodes
+- **Environment Variables**: Use environment variables for sensitive data
+- **Expression Support**: Full n8n expression support for all parameters
 
-# Copy to your n8n custom nodes directory
-cp -r dist/* ~/.n8n/custom/
-```
+### Connection Options
+- **Login Timeouts**: Configurable login and command prompt timeouts
+- **Custom Prompts**: Regex-based prompt detection for different devices
+- **Fallback Ciphers**: Automatic cipher fallback for compatibility
+- **Verbose Logging**: Detailed connection and execution logging
+- **Initial CR**: Send initial carriage return for device stimulation
+- **Keyboard Interactive**: Support for keyboard-interactive authentication
+- **Line Endings**: Configurable CRLF/LF line ending support
 
-## 🔧 Configuration
+### Enhanced Prompt Handling
+- **Device-Specific Detection**: Optimized prompt detection for Cisco, Aruba, and generic devices
+- **MAC Address Table Detection**: Special handling for large MAC address table outputs
+- **Stable Output Detection**: Intelligent timeout handling based on data flow patterns
+- **Pagination Support**: Automatic handling of --MORE-- prompts with device-specific keys
+- **Advanced ANSI Cleanup**: Comprehensive removal of control sequences and terminal codes
+- **Aruba-Specific Optimizations**: Enhanced support for Aruba OS, CX, and AP devices
+- **Privilege Escalation**: Automated enable mode handling for network devices
 
-### Credential Types
+### Advanced Optimizations
+- **Intelligent Logging**: Comprehensive logging system with buffer analysis and debug capabilities
+- **Device-Specific Timeouts**: Optimized timeout handling for different device types
+- **Character-by-Character Output**: Special handling for devices that send data character-by-character
+- **Banner/MOTD Filtering**: Automatic removal of login banners and message-of-the-day content
+- **Command Echo Removal**: Smart removal of command echoes with device-specific patterns
+- **Output Stability Detection**: Intelligent detection of command completion based on data flow
+- **SSH2 Support**: Enhanced SSH2-based connection manager for better cipher handling and retry logic
+- **Advanced Cipher Fallback**: Intelligent retry mechanism with multiple cipher attempts
 
-1. **Custom**: Simple username and password fields (default) - always visible
-2. **Standard SSH**: Basic SSH connection with password or private key
-3. **Enhanced Security**: Advanced security algorithms and configurations
-4. **Network Device**: Specialized for Cisco and Aruba network equipment
+### SSH2 Enhanced Features
+- **Advanced Algorithm Configuration**: Comprehensive cipher, KEX, HMAC, and server host key algorithm selection
+- **Device-Specific Compatibility**: Automatic algorithm adjustment for Aruba OS and other legacy devices
+- **Retry Logic**: Intelligent retry mechanism with configurable retry count and delay
+- **Cipher Fallback**: Automatic fallback to alternative ciphers when connection fails
+- **Keyboard-Interactive Auth**: Enhanced support for keyboard-interactive authentication
+- **Connection Timeout Management**: Configurable connection timeouts with proper cleanup
 
-### Dynamic Parameters Support
+### AI Agent Compatibility
+- **Usable as Tool**: Available for AI agents and automation workflows
+- **Structured Output**: Parsed command output with JSON and table detection
+- **Error Handling**: Comprehensive error detection and reporting
 
-The SuperSSH node now supports **dynamic parameters**, allowing you to:
+### Configuration Management
 
-* **Use different servers in the same workflow** - Connect to multiple servers dynamically
-* **Pass credentials from previous nodes** - Use data from previous workflow steps
-* **Use environment variables** - Store sensitive information securely
-
-#### Configuration Modes
-
-**1. Use Credentials (Default)**
-- Traditional mode using stored SSH credentials
-- Best for static connections and production environments
-
-**2. Dynamic Parameters**
-- Dynamic host, port, username, and password/private key
-- Supports n8n expressions like `={{ $json.server_ip }}`
-- Supports environment variables like `={{ $env.SSH_HOST }}`
-
-#### Dynamic Parameters Examples
-
-```json
-// Use data from previous node
+```javascript
+// Backup running configuration
 {
-  "configMode": "dynamic",
-  "dynamicHost": "={{ $json.server_ip }}",
-  "dynamicPort": "={{ $json.ssh_port }}",
-  "dynamicUsername": "={{ $json.username }}",
-  "dynamicPassword": "={{ $json.password }}"
+  "resource": "networkDevice",
+  "operation": "backupConfig",
+  "configType": "running",
+  "returnType": "text",
+  "networkDeviceOptions": {
+    "deviceType": "cisco"
+  }
 }
 
-// Use environment variables
+// Restore configuration from text input
 {
-  "configMode": "dynamic",
-  "dynamicHost": "={{ $env.SSH_HOST }}",
-  "dynamicPort": "={{ $env.SSH_PORT }}",
-  "dynamicUsername": "={{ $env.SSH_USER }}",
-  "dynamicPassword": "={{ $env.SSH_PASS }}"
+  "resource": "networkDevice",
+  "operation": "restoreConfig",
+  "configSource": "text",
+  "configCommands": "hostname router1\ninterface GigabitEthernet0/1\n description WAN",
+  "applyMethod": "merge",
+  "saveAfterApply": true,
+  "networkDeviceOptions": {
+    "deviceType": "aruba"
+  }
+}
+
+// Restore configuration from binary data
+{
+  "resource": "networkDevice",
+  "operation": "restoreConfig",
+  "configSource": "binary",
+  "binaryProperty": "configFile",
+  "applyMethod": "replace",
+  "saveAfterApply": false,
+  "networkDeviceOptions": {
+    "deviceType": "cisco"
+  }
 }
 ```
 
-### Custom Credentials Feature
+## Installation
 
-The **Custom** connection type provides a simplified interface similar to `n8n-nodes-customssh`:
-- Username field is always visible
-- Password field is always visible
-- No complex authentication method selection needed
-- Perfect for simple SSH connections
+Get started with SSH Nexus in seconds:
 
-### Supported Operations
+```bash
+npm install n8n-nodes-ssh-nexus
+```
 
-* **Command Execution**: Single, multiple, and sudo commands
-* **File Operations**: Upload, download, list, and delete
-* **System Information**: Overview, processes, disk usage, network interfaces
-* **Network Devices**: Cisco and Aruba device info, configuration, interfaces, custom commands
+🎉 **That's it!** Restart your n8n instance and find the shiny new **SSH Nexus** node in your palette, ready to supercharge your automation workflows!
 
-## 📖 Usage Examples
+### Quick Start
+1. Drag the **SSH Nexus** node into your workflow
+2. Configure your SSH credentials or use dynamic parameters
+3. Choose from our powerful operations (Command, File, Network Device, System Info, Connection Health, Smart Tools)
+4. Watch the magic happen! ✨
+
+## Usage
 
 ### Basic Command Execution
 
-```json
+```javascript
+// Execute a simple command
 {
   "resource": "command",
   "operation": "execute",
-  "command": "ls -la",
-  "cwd": "/home/user"
+  "command": "ls -la"
 }
 ```
 
-### File Upload
+### Network Device Operations
 
-```json
-{
-  "resource": "file",
-  "operation": "upload",
-  "path": "/home/user/uploads",
-  "binaryPropertyName": "data"
-}
-```
-
-### Network Device Info
-
-```json
+```javascript
+// Get device information
 {
   "resource": "networkDevice",
-  "operation": "getInfo"
+  "operation": "getVersion",
+  "networkDeviceOptions": {
+    "deviceType": "cisco"
+  }
+}
+
+// Get running configuration
+{
+  "resource": "networkDevice",
+  "operation": "getRunningConfig",
+  "networkDeviceOptions": {
+    "deviceType": "aruba"
+  }
 }
 ```
 
-## 🏗️ Project Structure
+### Multiple Commands
 
-```
-SuperSSH/
-├── credentials/
-│   └── SuperSshCredentials.credentials.ts
-├── nodes/
-│   └── SuperSsh/
-│       └── SuperSsh.node.ts
-├── utils/
-│   └── utilities.ts
-├── examples/
-│   └── workflow-example.json
-├── package.json
-├── tsconfig.json
-├── scripts/
-│   └── copy-files.js
-└── README.md
+```javascript
+// Execute multiple commands with wait times
+{
+  "resource": "command",
+  "operation": "executeMultiple",
+  "commands": "show version\nshow interfaces\nshow ip route",
+  "commandsFormat": "textList",
+  "defaultWaitTime": 1000
+}
 ```
 
-## 🔒 Security Features
+### AI-Friendly Command Lists
 
-* **Encryption**: AES128/256-GCM, ChaCha20-Poly1305
-* **Key Exchange**: Curve25519, ECDH with NIST curves
-* **Authentication**: HMAC-SHA2, UMAC algorithms
-* **Host Keys**: RSA, Ed25519, ECDSA support
+```javascript
+// Execute command list (AI-friendly)
+{
+  "resource": "command",
+  "operation": "executeCommandList",
+  "commands": "show version\nshow interfaces\nshow ip route",
+  "defaultWaitTime": 1000
+}
+```
 
-## 🧪 Testing
+## Supported Device Types
 
-The node includes built-in credential testing and comprehensive error handling. Test your SSH connections before using in production workflows.
+- **Cisco**: IOS, IOS-XE, NX-OS
+- **Aruba**: Aruba OS, Aruba CX, Aruba AP
+- **Generic**: Linux, Unix, Windows (via SSH)
 
-## 📝 License
+## Configuration Examples
 
-MIT License - see LICENSE file for details.
+### Secure Ciphers Only
+```javascript
+{
+  "cipher": "secure-only",
+  "compatibilityLevel": "modern-only",
+  "securityLevel": "high"
+}
+```
 
-## 🤝 Contributing
+### Legacy Device Compatibility
+```javascript
+{
+  "cipher": "legacy-only",
+  "compatibilityLevel": "high",
+  "securityLevel": "low",
+  "allowLegacyAlgorithms": true
+}
+```
 
-Contributions are welcome! Please feel free to submit pull requests or open issues.
+### Custom Prompt Detection
+```javascript
+{
+  "commandPrompt": "\\S+#\\s*$",
+  "passwordPrompt": "Password:",
+  "loginPromptTimeout": 10000
+}
+```
 
-## 📞 Support
+## License
 
-For support and questions:
+MIT License - see [LICENSE](LICENSE) file for details.
 
-* Open an issue on [GitHub](https://github.com/Sarryaz/SuperSSH)
-* Check the n8n documentation
-* Review the troubleshooting section
+## Repository
 
----
+[https://github.com/Sarryaz/SuperSSH](https://github.com/Sarryaz/SuperSSH)
 
-**Note**: This node requires proper SSH access to target systems. Ensure you have the necessary permissions and follow security best practices.
+## Support
+
+For issues and feature requests, please use the GitHub repository.

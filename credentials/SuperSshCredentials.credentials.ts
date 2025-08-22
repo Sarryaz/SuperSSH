@@ -3,63 +3,64 @@ import type { ICredentialType, INodeProperties } from 'n8n-workflow';
 export class SuperSshCredentials implements ICredentialType {
 	name = 'superSshCredentials';
 
-	displayName = 'Super SSH Credentials';
+	displayName = 'SSH Nexus Credentials';
 
 	documentationUrl = 'https://docs.n8n.io/integrations/builtin/credentials/ssh/';
 
 	properties: INodeProperties[] = [
-		{
-			displayName: 'Connection Type',
-			name: 'connectionType',
-			type: 'options',
-			options: [
-				{
-					name: 'Custom',
-					value: 'custom',
-					description: 'Custom credentials with username and password fields',
-				},
-				{
-					name: 'Standard SSH',
-					value: 'standard',
-					description: 'Standard SSH connection with basic security',
-				},
-				{
-					name: 'Enhanced Security',
-					value: 'enhanced',
-					description: 'Enhanced SSH connection with advanced security options',
-				},
-				{
-					name: 'Network Device',
-					value: 'networkDevice',
-					description: 'Specialized connection for Cisco and Aruba network devices',
-				},
-			],
-			default: 'custom',
-		},
+					{
+				displayName: 'Connection Type',
+				name: 'connectionType',
+				type: 'options',
+				options: [
+					{
+						name: 'Custom Connection',
+						value: 'custom',
+						description: 'Quick setup with username and password fields',
+					},
+					{
+						name: 'Standard SSH',
+						value: 'standard',
+						description: 'Standard SSH connection with basic security',
+					},
+					{
+						name: 'Enhanced Security',
+						value: 'enhanced',
+						description: 'Advanced SSH connection with enhanced security options',
+					},
+					{
+						name: 'Network Device',
+						value: 'networkDevice',
+						description: 'Optimized for Cisco, Aruba, and other network equipment',
+					},
+				],
+				default: 'custom',
+			},
 		{
 			displayName: 'Host',
 			name: 'host',
 			type: 'string',
 			default: '',
-			placeholder: 'localhost',
+			placeholder: '192.168.1.100 or server.example.com',
 			required: true,
 			description: 'Hostname or IP address of the SSH server',
 		},
 		{
-			displayName: 'Port',
+			displayName: '🔌 Port',
 			name: 'port',
 			type: 'number',
 			default: 22,
 			required: true,
-			description: 'Port number of the SSH server',
+			description: 'SSH port number (standard: 22)',
 		},
 		{
-			displayName: 'Username',
+			displayName: '👤 Username',
 			name: 'username',
 			type: 'string',
 			default: '',
+			placeholder: 'admin, root, or your username',
 			required: true,
-			description: 'Username to use for authentication',
+			description: 'Username for SSH authentication',
 		},
 		{
 			displayName: 'Authentication Method',
@@ -143,37 +144,59 @@ export class SuperSshCredentials implements ICredentialType {
 			default: {},
 			options: [
 				{
-					displayName: 'Cipher',
+					displayName: 'Cipher Selection',
 					name: 'cipher',
 					type: 'options',
 					options: [
-						{
-							name: 'AES128-GCM@openssh.com',
-							value: 'aes128-gcm@openssh.com',
-						},
-						{
-							name: 'AES256-GCM@openssh.com',
-							value: 'aes256-gcm@openssh.com',
-						},
-						{
-							name: 'chacha20-poly1305@openssh.com',
-							value: 'chacha20-poly1305@openssh.com',
-						},
-						{
-							name: 'aes128-ctr',
-							value: 'aes128-ctr',
-						},
-						{
-							name: 'aes192-ctr',
-							value: 'aes192-ctr',
-						},
-						{
-							name: 'aes256-ctr',
-							value: 'aes256-ctr',
-						},
+						{ name: 'All Available Ciphers (Including Legacy)', value: 'all' },
+						{ name: 'Secure Ciphers Only', value: 'secure-only' },
+						{ name: 'Legacy Ciphers Only', value: 'legacy-only' },
+						{ name: 'AES 128-bit CTR', value: 'aes128-ctr' },
+						{ name: 'AES 192-bit CTR', value: 'aes192-ctr' },
+						{ name: 'AES 256-bit CTR', value: 'aes256-ctr' },
+						{ name: 'AES 128-bit GCM', value: 'aes128-gcm@openssh.com' },
+						{ name: 'AES 256-bit GCM', value: 'aes256-gcm@openssh.com' },
+						{ name: 'ChaCha20-Poly1305', value: 'chacha20-poly1305@openssh.com' },
+						// Legacy ciphers
+						{ name: 'AES 128-bit CBC (Legacy)', value: 'aes128-cbc' },
+						{ name: 'AES 192-bit CBC (Legacy)', value: 'aes192-cbc' },
+						{ name: 'AES 256-bit CBC (Legacy)', value: 'aes256-cbc' },
+						{ name: '3DES CBC (Legacy)', value: '3des-cbc' },
 					],
-					default: 'aes256-gcm@openssh.com',
-					description: 'Encryption cipher to use',
+					default: 'all',
+					description: 'Select specific cipher or cipher group for the SSH connection',
+				},
+				{
+					displayName: 'Compatibility Level',
+					name: 'compatibilityLevel',
+					type: 'options',
+					options: [
+						{ name: 'High (Most Compatible, Less Secure)', value: 'high' },
+						{ name: 'Medium (Balance of Compatibility and Security)', value: 'medium' },
+						{ name: 'Legacy Only (For Very Old Devices)', value: 'legacy-only' },
+						{ name: 'Modern Only (Most Secure, Least Compatible)', value: 'modern-only' },
+					],
+					default: 'medium',
+					description: 'Compatibility level for key exchange and encryption algorithms',
+				},
+				{
+					displayName: 'Security Level',
+					name: 'securityLevel',
+					type: 'options',
+					options: [
+						{ name: 'High (Most Secure)', value: 'high' },
+						{ name: 'Medium (Balance)', value: 'medium' },
+						{ name: 'Low (Most Compatible)', value: 'low' },
+					],
+					default: 'medium',
+					description: 'Security level for MAC and host key algorithms',
+				},
+				{
+					displayName: 'Allow Legacy Algorithms',
+					name: 'allowLegacyAlgorithms',
+					type: 'boolean',
+					default: true,
+					description: 'Allow older, less secure algorithms for maximum compatibility',
 				},
 				{
 					displayName: 'KEX Algorithm',
@@ -202,7 +225,7 @@ export class SuperSshCredentials implements ICredentialType {
 						},
 					],
 					default: 'curve25519-sha256',
-					description: 'Key exchange algorithm',
+					description: 'Key exchange algorithm (overrides compatibility level)',
 				},
 				{
 					displayName: 'MAC Algorithm',
@@ -227,7 +250,7 @@ export class SuperSshCredentials implements ICredentialType {
 						},
 					],
 					default: 'hmac-sha2-256',
-					description: 'Message authentication code algorithm',
+					description: 'Message authentication code algorithm (overrides security level)',
 				},
 				{
 					displayName: 'Host Key Algorithm',
@@ -346,6 +369,73 @@ export class SuperSshCredentials implements ICredentialType {
 					type: 'number',
 					default: 1000,
 					description: 'Delay between retries in milliseconds',
+				},
+				{
+					displayName: 'Try Keyboard-Interactive',
+					name: 'tryKeyboard',
+					type: 'boolean',
+					default: false,
+					description: 'Enable keyboard-interactive authentication for devices requiring prompts',
+				},
+				{
+					displayName: 'Login Prompt Timeout',
+					name: 'loginPromptTimeout',
+					type: 'number',
+					default: 8000,
+					description: 'Timeout for login prompt detection in milliseconds',
+				},
+				{
+					displayName: 'Username Prompt',
+					name: 'usernamePrompt',
+					type: 'string',
+					default: 'login:|username:|user:',
+					description: 'Regular expression to match username prompt',
+				},
+				{
+					displayName: 'Password Prompt',
+					name: 'passwordPrompt',
+					type: 'string',
+					default: 'password:|Password:',
+					description: 'Regular expression to match password prompt',
+				},
+				{
+					displayName: 'Command Prompt',
+					name: 'commandPrompt',
+					type: 'string',
+					default: '[#>$]\\s*$',
+					description: 'Regular expression to match command prompt',
+				},
+				{
+					displayName: 'Try Fallback Ciphers',
+					name: 'fallbackCiphers',
+					type: 'boolean',
+					default: true,
+					description: 'Automatically try other ciphers if the selected one fails',
+				},
+				{
+					displayName: 'Verbose Logging',
+					name: 'verboseLogging',
+					type: 'boolean',
+					default: false,
+					description: 'Enable detailed logging (not recommended for production)',
+				},
+				{
+					displayName: 'Send Initial CR',
+					name: 'sendInitialCR',
+					type: 'boolean',
+					default: false,
+					description: 'Send carriage return after connection (for some legacy devices)',
+				},
+				{
+					displayName: 'Line Ending',
+					name: 'lineEnding',
+					type: 'options',
+					options: [
+						{ name: 'CRLF (\\r\\n)', value: 'CRLF' },
+						{ name: 'LF (\\n)', value: 'LF' },
+					],
+					default: 'CRLF',
+					description: 'Line ending used when sending commands in shell mode',
 				},
 			],
 		},
