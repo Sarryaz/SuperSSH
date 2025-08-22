@@ -1,0 +1,97 @@
+{
+  "name": "Super SSH Example Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "command": "uname -a && whoami && pwd",
+        "cwd": "/home/user",
+        "advancedOptions": {
+          "commandTimeout": 30000,
+          "parseOutput": true,
+          "continueOnError": false
+        }
+      },
+      "id": "super-ssh-command",
+      "name": "Super SSH - System Info",
+      "type": "n8n-nodes-superssh.superSsh",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "credentials": {
+        "superSshCredentials": {
+          "id": "your-credential-id",
+          "name": "Super SSH Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "systemInfo",
+        "operation": "overview"
+      },
+      "id": "super-ssh-system",
+      "name": "Super SSH - System Overview",
+      "type": "n8n-nodes-superssh.superSsh",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "superSshCredentials": {
+          "id": "your-credential-id",
+          "name": "Super SSH Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "networkDevice",
+        "operation": "getInfo"
+      },
+      "id": "super-ssh-network",
+      "name": "Super SSH - Network Device",
+      "type": "n8n-nodes-superssh.superSsh",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "superSshCredentials": {
+          "id": "your-credential-id",
+          "name": "Super SSH Credentials"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Super SSH - System Info": {
+      "main": [
+        [
+          {
+            "node": "Super SSH - System Overview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Super SSH - System Overview": {
+      "main": [
+        [
+          {
+            "node": "Super SSH - Network Device",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0.0",
+  "meta": {
+    "instanceId": "example-instance"
+  },
+  "id": "super-ssh-example-workflow",
+  "tags": ["ssh", "automation", "system-management"]
+}

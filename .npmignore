@@ -1,0 +1,20 @@
+# Development files
+.git/
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test files
+test/
+tests/
+*.test.ts
+*.test.js
+
+# Only exclude development-specific files, keep source and dist for transparency

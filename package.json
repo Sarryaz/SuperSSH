@@ -1,0 +1,75 @@
+{
+  "name": "n8n-nodes-superssh",
+  "version": "1.0.0",
+  "description": "Enhanced n8n SSH node with advanced credential management and specialized support for Cisco and Aruba network devices",
+  "keywords": [
+    "n8n-community-node-package",
+    "ssh",
+    "scp",
+    "sftp",
+    "custom-credentials",
+    "enhanced-security",
+    "network-devices",
+    "cisco",
+    "aruba"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/timsemisch/SuperSSH",
+  "author": {
+    "name": "Tim Semisch",
+    "email": "tim.semisch@kupper-computer.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timsemisch/SuperSSH.git"
+  },
+  "engines": {
+    "node": ">=18.10",
+    "npm": ">=9.0.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials utils --write",
+    "lint": "eslint nodes credentials utils package.json",
+    "lintfix": "eslint nodes credentials utils package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint",
+    "postpack": "rm -f *.tgz"
+  },
+  "files": [
+    "dist",
+    "nodes",
+    "credentials",
+    "utils",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/SuperSshCredentials.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/SuperSsh/SuperSsh.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/parser": "^7.15.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.1",
+    "gulp": "^4.0.2",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3",
+    "@n8n/nodes-base": "^1.16.1"
+  },
+  "dependencies": {
+    "node-ssh": "^13.1.0",
+    "tmp-promise": "^3.0.3"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
