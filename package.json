@@ -1,66 +1,40 @@
 {
-  "name": "n8n-nodes-superssh",
-  "version": "1.0.1",
-  "description": "Enhanced n8n SSH node with advanced credential management and specialized support for Cisco and Aruba network devices",
-  "keywords": [
-    "n8n-community-node-package",
-    "ssh",
-    "scp",
-    "sftp",
-    "custom-credentials",
-    "enhanced-security",
-    "network-devices",
-    "cisco",
-    "aruba"
-  ],
+  "name": "n8n-nodes-sshtemplateparser",
+  "version": "0.1.0",
+  "description": "n8n community node: SSH Template Parser with TextFSM-like engine",
+  "author": "Community",
   "license": "MIT",
-  "homepage": "https://github.com/timsemisch/SuperSSH",
-  "author": {
-    "name": "Tim Semisch",
-    "email": "tim.semisch@kupper-computer.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/timsemisch/SuperSSH.git"
-  },
-  "engines": {
-    "node": ">=18.10",
-    "npm": ">=9.0.0"
-  },
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc && npm run copy-files",
-    "dev": "tsc --watch",
-    "prepublishOnly": "npm run build",
-    "copy-files": "node scripts/copy-files.js"
-  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "nodes",
-    "credentials",
-    "utils",
-    "examples",
-    "README.md",
-    "LICENSE"
+    "dist"
   ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-files.js",
+    "dev": "tsc -w -p tsconfig.json",
+    "prepare": "npm run build"
+  },
   "n8n": {
     "n8nNodesApiVersion": 1,
+    "nodes": [
+      "dist/nodes/SshTemplateParser/SshTemplateParser.node.js",
+      "dist/nodes/SuperSsh/SuperSsh.node.js"
+    ],
     "credentials": [
       "dist/credentials/SuperSshCredentials.credentials.js"
-    ],
-    "nodes": [
-      "dist/nodes/SuperSsh/SuperSsh.node.js"
     ]
   },
-  "devDependencies": {
-    "@types/node": "^22.13.10",
-    "typescript": "^5.5.3"
-  },
   "dependencies": {
+    "fs-extra": "^11.1.1",
     "node-ssh": "^13.1.0",
-    "tmp-promise": "^3.0.3"
+    "path": "^0.12.7",
+    "tmp-promise": "^3.0.3",
+    "n8n-core": "^1.61.0",
+    "n8n-workflow": "^1.61.0"
   },
-  "peerDependencies": {
-    "n8n-workflow": "*"
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/node": "^20.11.19",
+    "typescript": "^5.4.0"
   }
 }

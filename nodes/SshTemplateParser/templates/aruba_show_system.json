@@ -1,0 +1,30 @@
+{
+  "id": "aruba_show_system_v1",
+  "name": "Aruba Show System",
+  "vendor": "aruba",
+  "deviceOs": "aruba_os",
+  "command": "show system",
+  "description": "Parse key-value system info",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^(?<key>[A-Za-z0-9 _-]+):\s+(?<value>.*)$",
+          "actions": [
+            { "type": "append", "variable": "entries", "fromGroup": "key" },
+            { "type": "append", "variable": "entries", "fromGroup": "value" }
+          ],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-01-01T00:00:00.000Z",
+    "updated": "2025-01-01T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "auto",
+    "tested": false
+  }
+}
