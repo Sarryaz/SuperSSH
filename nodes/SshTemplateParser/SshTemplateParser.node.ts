@@ -3,6 +3,7 @@ import { NodeOperationError } from 'n8n-workflow';
 import { TemplateManager } from './TemplateManager';
 import { TextFsmEngine } from './TextFsmEngine';
 import type { Template } from './types/template';
+import { buildTemplateFromParams } from './TemplateBuilder';
 
 export class SshTemplateParser implements INodeType {
 	description: INodeTypeDescription = {
@@ -67,13 +68,98 @@ export class SshTemplateParser implements INodeType {
 				default: '',
 			},
 
-			// Create Template (minimal)
+			// Create Template (form/json)
+			{
+				displayName: 'Template Source',
+				name: 'templateSource',
+				type: 'options',
+				displayOptions: { show: { operation: ['createTemplate'] } },
+				options: [
+					{ name: 'Form', value: 'form' },
+					{ name: 'JSON', value: 'json' },
+				],
+				default: 'form',
+			},
+			{
+				displayName: 'Template Name',
+				name: 'templateName',
+				type: 'string',
+				displayOptions: { show: { operation: ['createTemplate'], templateSource: ['form'] } },
+				default: '',
+				required: true,
+			},
+			{
+				displayName: 'Vendor',
+				name: 'vendor',
+				type: 'options',
+				displayOptions: { show: { operation: ['createTemplate'], templateSource: ['form'] } },
+				options: [
+					{ name: 'Aruba', value: 'aruba' },
+					{ name: 'Cisco', value: 'cisco' },
+					{ name: 'Juniper', value: 'juniper' },
+					{ name: 'Generic', value: 'generic' },
+				],
+				default: 'aruba',
+			},
+			{
+				displayName: 'Device OS',
+				name: 'deviceOs',
+				type: 'string',
+				displayOptions: { show: { operation: ['createTemplate'], templateSource: ['form'] } },
+				default: '',
+			},
+			{
+				displayName: 'Command',
+				name: 'command',
+				type: 'string',
+				displayOptions: { show: { operation: ['createTemplate'], templateSource: ['form'] } },
+				default: '',
+			},
+			{
+				displayName: 'States',
+				name: 'states',
+				type: 'fixedCollection',
+				displayOptions: { show: { operation: ['createTemplate'], templateSource: ['form'] } },
+				placeholder: 'Add State',
+				default: {},
+				options: [
+					{
+						name: 'state',
+						displayName: 'State',
+						values: [
+							{ displayName: 'State Name', name: 'name', type: 'string', default: 'start', required: true },
+							{
+								displayName: 'Patterns',
+								name: 'patterns',
+								type: 'fixedCollection',
+								placeholder: 'Add Pattern',
+								default: {},
+								options: [
+									{
+										name: 'pattern',
+										displayName: 'Pattern',
+										values: [
+											{ displayName: 'Regex', name: 'regex', type: 'string', required: true, default: '' },
+											{ displayName: 'Flags', name: 'flags', type: 'string', default: '' },
+											{ displayName: 'Emit On Match', name: 'emit', type: 'boolean', default: true },
+											{ displayName: 'Transition To', name: 'transitionTo', type: 'string', default: 'self' },
+											{ displayName: 'Map (JSON)', name: 'map', type: 'string', default: '' },
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+
+			// Create/Upload Template via JSON
 			{
 				displayName: 'Template JSON',
 				name: 'templateJson',
 				type: 'string',
 				typeOptions: { rows: 8 },
-				displayOptions: { show: { operation: ['createTemplate', 'uploadTemplate'] } },
+				displayOptions: { show: { operation: ['createTemplate', 'uploadTemplate'], templateSource: ['json'] } },
 				default: '',
 				description: 'Template definition as JSON',
 			},
@@ -143,7 +229,33 @@ export class SshTemplateParser implements INodeType {
 			return [out.map((o) => ({ json: o }))];
 		}
 
-		if (operation === 'createTemplate' || operation === 'uploadTemplate') {
+		if (operation === 'createTemplate') {
+			const source = this.getNodeParameter('templateSource', 0) as string;
+			if (source === 'json') {
+				const json = this.getNodeParameter('templateJson', 0) as string;
+				let tpl: Template;
+				try {
+					tpl = JSON.parse(json);
+				} catch (e) {
+					throw new NodeOperationError(this.getNode(), `Invalid JSON: ${(e as Error).message}`);
+				}
+				const saved = await mgr.upsert(tpl);
+				return [[{ json: { ok: true, id: saved.id, name: saved.name } }]];
+			}
+
+			// form mode
+			const name = this.getNodeParameter('templateName', 0) as string;
+			const vendor = this.getNodeParameter('vendor', 0) as string;
+			const deviceOs = this.getNodeParameter('deviceOs', 0, '') as string;
+			const command = this.getNodeParameter('command', 0, '') as string;
+			const states = this.getNodeParameter('states', 0, {}) as IDataObject;
+			const params: Record<string, unknown> = { templateName: name, vendor, deviceOs, command, states };
+			const built = buildTemplateFromParams(params);
+			const saved = await mgr.upsert(built);
+			return [[{ json: { ok: true, id: saved.id, name: saved.name } }]];
+		}
+
+		if (operation === 'uploadTemplate') {
 			const json = this.getNodeParameter('templateJson', 0) as string;
 			let tpl: Template;
 			try {
