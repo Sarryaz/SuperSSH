@@ -1,263 +1,345 @@
-# SSH Nexus - The Ultimate SSH Automation Hub for n8n
+# SSH Nexus for n8n
 
-> *"May the SSH be with you!"*
+**The Ultimate SSH Automation Hub - Advanced SSH operations with intelligent TextFSM template parsing**
 
-SSH Nexus is the most advanced and feature-rich SSH node for n8n, designed for network automation, system administration, and intelligent remote operations. Built with ❤️ by Sarryaz for the automation community!
+> ⚠️ **BETA VERSION** - This package is currently in beta. Please report any bugs or issues you encounter to help us improve SSH Nexus!
 
-## What Makes SSH Nexus Special?
+SSH Nexus is a comprehensive n8n package that combines two powerful nodes into one unified solution for network device automation and SSH operations. Built for network engineers, DevOps teams, and automation specialists who need to manage network devices and extract structured data from command outputs.
 
-SSH Nexus goes beyond basic SSH functionality with **intelligent features** that make network automation a breeze:
-- **Connection Health Monitoring** - Real-time connection quality analysis
-- **Smart Network Discovery** - Intelligent topology discovery and device detection  
-- **Security Auditing** - Automated security configuration analysis
-- **Performance Benchmarking** - System and network performance testing
-- **AI-Optimized** - Built for seamless AI agent integration
+## 🏗️ Project Architecture
 
-## Unique Features
+SSH Nexus consists of two specialized nodes that work together seamlessly:
 
-### Connection Health Monitoring
-- **Health Check**: Comprehensive connection analysis with health scoring
-- **Latency Testing**: Real-time latency and jitter measurement with quality assessment
-- **Throughput Testing**: Data transfer performance analysis
+### **Core Components**
 
-### Smart Tools
-- **Network Discovery**: Intelligent network topology discovery using ping and ARP
-- **Port Scanner**: Smart port scanning with service detection
-- **Performance Benchmark**: System performance testing (CPU, Memory, Disk, Network)
-- **Security Audit**: Automated security configuration analysis with findings
+1. **SuperSSH Node** - Advanced SSH Operations & Device Management
+2. **SSH Template Parser Node** - TextFSM Template Engine for Output Parsing
 
-## 📋 Core Features
+These nodes are designed to work independently or together in workflows, providing a complete solution for network automation tasks.
 
-### Core SSH Operations
-- **Command Execution**: Execute single commands with sudo support
-- **Multiple Commands**: Execute multiple commands in sequence with configurable wait times
-- **Command List Execution**: AI-friendly command list execution from text input
-- **File Operations**: Upload, download, list, and delete files
-- **System Information**: Get system overview, processes, disk usage, and memory info
+## 🚀 What SSH Nexus Delivers
 
-### Network Device Support
-- **Device Information**: Get version, running configuration, startup configuration
-- **Configuration Management**: Backup and restore device configurations with text or binary input
-- **Configuration Options**: Support for running vs startup configs, merge vs replace operations
-- **Interface Information**: Get network interface details
-- **Custom Commands**: Execute device-specific commands
-- **Privilege Escalation**: Support for enable mode with password
+### **SuperSSH Node** - Your SSH Powerhouse
+- **Multi-device management** with intelligent connection pooling
+- **Advanced credential management** with secure storage
+- **Network device optimization** for Cisco, Aruba, Juniper, and generic devices
+- **Batch operations** across multiple devices simultaneously
+- **Connection health monitoring** and performance testing
+- **Security auditing** and configuration management
+- **AI agent compatibility** for automated workflows
 
-### Enhanced Security & Compatibility
-- **Cipher Selection**: All available ciphers, secure-only, legacy-only, or specific ciphers
-- **Advanced Security Options**: Compatibility levels, security levels, legacy algorithm support
-- **Key Exchange Algorithms**: Configurable KEX algorithms with compatibility presets
-- **HMAC Algorithms**: Configurable MAC algorithms with security level presets
-- **Host Key Algorithms**: Configurable server host key algorithms
+### **SSH Template Parser Node** - Intelligent Output Processing
+- **TextFSM template engine** for parsing structured command outputs
+- **Pre-built templates** for Aruba, Cisco, and other vendor commands
+- **Custom template creation** via user-friendly forms or JSON upload
+- **Structured data extraction** with automatic type conversion
+- **Template management** and sharing capabilities
+- **Debug mode** for troubleshooting parsing issues
 
-### Dynamic Parameters
-- **Dynamic Hosts**: Use different servers in the same workflow
-- **Dynamic Credentials**: Pass credentials from previous nodes
-- **Environment Variables**: Use environment variables for sensitive data
-- **Expression Support**: Full n8n expression support for all parameters
-
-### Connection Options
-- **Login Timeouts**: Configurable login and command prompt timeouts
-- **Custom Prompts**: Regex-based prompt detection for different devices
-- **Fallback Ciphers**: Automatic cipher fallback for compatibility
-- **Verbose Logging**: Detailed connection and execution logging
-- **Initial CR**: Send initial carriage return for device stimulation
-- **Keyboard Interactive**: Support for keyboard-interactive authentication
-- **Line Endings**: Configurable CRLF/LF line ending support
-
-### Enhanced Prompt Handling
-- **Device-Specific Detection**: Optimized prompt detection for Cisco, Aruba, and generic devices
-- **MAC Address Table Detection**: Special handling for large MAC address table outputs
-- **Stable Output Detection**: Intelligent timeout handling based on data flow patterns
-- **Pagination Support**: Automatic handling of --MORE-- prompts with device-specific keys
-- **Advanced ANSI Cleanup**: Comprehensive removal of control sequences and terminal codes
-- **Aruba-Specific Optimizations**: Enhanced support for Aruba OS, CX, and AP devices
-- **Privilege Escalation**: Automated enable mode handling for network devices
-
-### Advanced Optimizations
-- **Intelligent Logging**: Comprehensive logging system with buffer analysis and debug capabilities
-- **Device-Specific Timeouts**: Optimized timeout handling for different device types
-- **Character-by-Character Output**: Special handling for devices that send data character-by-character
-- **Banner/MOTD Filtering**: Automatic removal of login banners and message-of-the-day content
-- **Command Echo Removal**: Smart removal of command echoes with device-specific patterns
-- **Output Stability Detection**: Intelligent detection of command completion based on data flow
-- **SSH2 Support**: Enhanced SSH2-based connection manager for better cipher handling and retry logic
-- **Advanced Cipher Fallback**: Intelligent retry mechanism with multiple cipher attempts
-
-### SSH2 Enhanced Features
-- **Advanced Algorithm Configuration**: Comprehensive cipher, KEX, HMAC, and server host key algorithm selection
-- **Device-Specific Compatibility**: Automatic algorithm adjustment for Aruba OS and other legacy devices
-- **Retry Logic**: Intelligent retry mechanism with configurable retry count and delay
-- **Cipher Fallback**: Automatic fallback to alternative ciphers when connection fails
-- **Keyboard-Interactive Auth**: Enhanced support for keyboard-interactive authentication
-- **Connection Timeout Management**: Configurable connection timeouts with proper cleanup
-
-### AI Agent Compatibility
-- **Usable as Tool**: Available for AI agents and automation workflows
-- **Structured Output**: Parsed command output with JSON and table detection
-- **Error Handling**: Comprehensive error detection and reporting
-
-### Configuration Management
-
-```javascript
-// Backup running configuration
-{
-  "resource": "networkDevice",
-  "operation": "backupConfig",
-  "configType": "running",
-  "returnType": "text",
-  "networkDeviceOptions": {
-    "deviceType": "cisco"
-  }
-}
-
-// Restore configuration from text input
-{
-  "resource": "networkDevice",
-  "operation": "restoreConfig",
-  "configSource": "text",
-  "configCommands": "hostname router1\ninterface GigabitEthernet0/1\n description WAN",
-  "applyMethod": "merge",
-  "saveAfterApply": true,
-  "networkDeviceOptions": {
-    "deviceType": "aruba"
-  }
-}
-
-// Restore configuration from binary data
-{
-  "resource": "networkDevice",
-  "operation": "restoreConfig",
-  "configSource": "binary",
-  "binaryProperty": "configFile",
-  "applyMethod": "replace",
-  "saveAfterApply": false,
-  "networkDeviceOptions": {
-    "deviceType": "cisco"
-  }
-}
-```
-
-## Installation
-
-Get started with SSH Nexus in seconds:
+## 📦 Installation
 
 ```bash
 npm install n8n-nodes-ssh-nexus
 ```
 
-🎉 **That's it!** Restart your n8n instance and find the shiny new **SSH Nexus** node in your palette, ready to supercharge your automation workflows!
+After installation, you'll find both nodes in your n8n palette:
+- **"SSH Nexus"** (SuperSSH node)
+- **"SSH Template Parser"** (TextFSM parser node)
 
-### Quick Start
-1. Drag the **SSH Nexus** node into your workflow
-2. Configure your SSH credentials or use dynamic parameters
-3. Choose from our powerful operations (Command, File, Network Device, System Info, Connection Health, Smart Tools)
-4. Watch the magic happen! ✨
+## 🔑 Quick Start Guide
 
-## Usage
+### **Step 1: Set Up SSH Credentials**
+1. Add **SuperSSH Credentials** to your n8n instance
+2. Configure your SSH connection details (host, username, password/key)
 
-### Basic Command Execution
+### **Step 2: Execute Commands with SuperSSH**
+1. Drag the **"SSH Nexus"** node into your workflow
+2. Select your credentials
+3. Choose an operation (Execute Command, Upload File, etc.)
+4. Configure your target devices and commands
 
-```javascript
-// Execute a simple command
+### **Step 3: Parse Output with TextFSM Templates**
+1. Connect the **"SSH Template Parser"** node after SuperSSH
+2. Select a pre-built template (e.g., "Aruba AOS-CX - Show ARP")
+3. The parser automatically converts raw SSH output into structured JSON
+
+## 🔄 Workflow Patterns
+
+### **Pattern 1: Basic Device Information**
+```
+SSH Nexus (Execute: "show version") 
+  → SSH Template Parser (Parse with "show version" template)
+  → HTTP Request (Send to inventory system)
+```
+
+### **Pattern 2: Network Monitoring**
+```
+SSH Nexus (Execute: "show interface brief" on multiple devices)
+  → SSH Template Parser (Parse each device output)
+  → Filter (Status = "down")
+  → Slack (Send alert notification)
+```
+
+### **Pattern 3: Configuration Management**
+```
+SSH Nexus (Backup running config)
+  → SSH Template Parser (Parse config sections)
+  → Code Node (Validate configuration)
+  → HTTP Request (Update documentation)
+```
+
+## 📋 Understanding TextFSM Templates
+
+### **What is TextFSM?**
+TextFSM (Text Finite State Machine) is a template language that defines how to parse structured text output. Think of it as a "smart pattern matcher" that extracts specific data from command outputs and converts them into structured JSON.
+
+### **How TextFSM Works in SSH Nexus**
+1. **Raw Output**: SSH command returns unstructured text
+2. **Template**: TextFSM template defines patterns to match
+3. **Parsed Result**: Structured JSON with extracted data
+
+### **Example: Parsing "show arp" Output**
+
+**Raw SSH Output:**
+```
+IPv4 Address      MAC Address       Port  Physical Port  State  VRF
+192.168.1.1      00:11:22:33:44:55 1/1/1 1/1/1         active default
+192.168.1.2      00:11:22:33:44:66 1/1/2 1/1/2         active default
+```
+
+**TextFSM Template Definition:**
+```json
 {
-  "resource": "command",
-  "operation": "execute",
-  "command": "ls -la"
+  "name": "aruba_aoscx_show_arp_all_vrfs",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show arp all-vrfs",
+  "variables": [
+    {"name": "IP_ADDRESS", "pattern": "(\\d+\\.\\d+\\.\\d+\\.\\d+)", "type": "ip"},
+    {"name": "MAC_ADDRESS", "pattern": "([0-9a-fA-F:]+)", "type": "mac"},
+    {"name": "PORT_ID", "pattern": "(\\S+)"},
+    {"name": "PHYSICAL_PORT", "pattern": "(\\S+)"},
+    {"name": "STATE", "pattern": "([a-z]+)"},
+    {"name": "VRF", "pattern": "(\\S+)"}
+  ],
+  "states": [
+    {
+      "name": "Start",
+      "patterns": [
+        {
+          "regex": "^IPv4 Address\\s+MAC\\s+Port\\s+Physical\\s+Port\\s+State",
+          "actions": ["Next"]
+        },
+        {
+          "regex": "^${IP_ADDRESS}\\s+${MAC_ADDRESS}\\s+${PORT_ID}\\s+${PHYSICAL_PORT}\\s+${STATE}\\s+${VRF}",
+          "actions": ["Record", "Next"]
+        }
+      ]
+    }
+  ]
 }
 ```
 
-### Network Device Operations
-
-```javascript
-// Get device information
-{
-  "resource": "networkDevice",
-  "operation": "getVersion",
-  "networkDeviceOptions": {
-    "deviceType": "cisco"
+**Parsed Result (Structured JSON):**
+```json
+[
+  {
+    "IP_ADDRESS": "192.168.1.1",
+    "MAC_ADDRESS": "00:11:22:33:44:55",
+    "PORT_ID": "1/1/1",
+    "PHYSICAL_PORT": "1/1/1",
+    "STATE": "active",
+    "VRF": "default"
+  },
+  {
+    "IP_ADDRESS": "192.168.1.2",
+    "MAC_ADDRESS": "00:11:22:33:44:66",
+    "PORT_ID": "1/1/2",
+    "PHYSICAL_PORT": "1/1/2",
+    "STATE": "active",
+    "VRF": "default"
   }
-}
+]
+```
 
-// Get running configuration
-{
-  "resource": "networkDevice",
-  "operation": "getRunningConfig",
-  "networkDeviceOptions": {
-    "deviceType": "aruba"
+## 🛠️ Creating Custom TextFSM Templates
+
+### **Method 1: Form-Based Creation (Beginner Friendly)**
+1. Use the **SSH Template Parser** node
+2. Select **"Create Template"** operation
+3. Choose **"Form"** as template source
+4. Fill out the fields:
+   - **Template Name**: Descriptive name (e.g., `my_device_show_status`)
+   - **Vendor**: Device vendor (Aruba, Cisco, Juniper, Generic)
+   - **Device OS**: Operating system version
+   - **Command**: The command this template parses
+   - **Variables**: Define what data to extract
+   - **Patterns**: Define how to match and extract data
+
+### **Method 2: JSON Upload (Advanced Users)**
+1. Create a JSON file following the template structure above
+2. Use the **"Upload Template"** operation
+3. Upload your JSON file
+4. The template becomes available immediately
+
+### **Template Components Explained**
+
+#### **Variables Section**
+```json
+"variables": [
+  {
+    "name": "INTERFACE",           // Variable name in results
+    "pattern": "(\\S+)",           // Regex pattern to match
+    "type": "string",              // Data type (string, number, ip, mac, list)
+    "description": "Interface name", // Optional description
+    "required": true               // Whether this field is required
   }
-}
+]
 ```
 
-### Multiple Commands
-
-```javascript
-// Execute multiple commands with wait times
-{
-  "resource": "command",
-  "operation": "executeMultiple",
-  "commands": "show version\nshow interfaces\nshow ip route",
-  "commandsFormat": "textList",
-  "defaultWaitTime": 1000
-}
+#### **States Section**
+```json
+"states": [
+  {
+    "name": "Start",               // State name
+    "patterns": [
+      {
+        "regex": "^${INTERFACE}\\s+${STATUS}",  // Pattern to match
+        "actions": ["Record", "Next"]           // Actions to take
+      }
+    ]
+  }
+]
 ```
 
-### AI-Friendly Command Lists
+#### **Available Actions**
+- **`Record`**: Save current variables and start new record
+- **`Next`**: Move to next line
+- **`Continue`**: Keep current variables for next line
+- **`Error`**: Handle parsing errors gracefully
 
-```javascript
-// Execute command list (AI-friendly)
-{
-  "resource": "command",
-  "operation": "executeCommandList",
-  "commands": "show version\nshow interfaces\nshow ip route",
-  "defaultWaitTime": 1000
-}
-```
+## 📚 Pre-Built TextFSM Templates
 
-## Supported Device Types
+SSH Nexus comes with ready-to-use templates for common network commands:
 
-- **Cisco**: IOS, IOS-XE, NX-OS
-- **Aruba**: Aruba OS, Aruba CX, Aruba AP
-- **Generic**: Linux, Unix, Windows (via SSH)
+### **Aruba AOS-CX Templates**
+- **`show arp`** - ARP table parsing
+- **`show interface brief`** - Interface status summary
+- **`show mac-address-table`** - MAC address table
+- **`show lldp neighbor-info`** - LLDP neighbor information
+- **`show clock`** - System time and date
+- **`show aaa authentication port-access`** - Port access authentication status
 
-## Configuration Examples
+### **Aruba OS Templates**
+- **`show ap database`** - Access point database
+- **`show system`** - System information
+- **`show version`** - Version information
+- **`show interface status`** - Interface status
 
-### Secure Ciphers Only
-```javascript
-{
-  "cipher": "secure-only",
-  "compatibilityLevel": "modern-only",
-  "securityLevel": "high"
-}
-```
+## 🔧 Advanced Features
 
-### Legacy Device Compatibility
-```javascript
-{
-  "cipher": "legacy-only",
-  "compatibilityLevel": "high",
-  "securityLevel": "low",
-  "allowLegacyAlgorithms": true
-}
-```
+### **SuperSSH Node Features**
+- **Multi-device operations** with connection pooling
+- **Device-specific optimizations** for Cisco, Aruba, and generic devices
+- **Advanced security options** with cipher selection and compatibility modes
+- **Connection health monitoring** with performance metrics
+- **Batch command execution** across device groups
+- **File operations** (upload, download, backup, restore)
 
-### Custom Prompt Detection
-```javascript
-{
-  "commandPrompt": "\\S+#\\s*$",
-  "passwordPrompt": "Password:",
-  "loginPromptTimeout": 10000
-}
-```
+### **SSH Template Parser Features**
+- **Output modes**: Single item (all records) or split items (one per record)
+- **Text source options**: Input field, JSON path, or direct string
+- **Debug mode**: Detailed parsing trace for troubleshooting
+- **Type coercion**: Automatic data type conversion based on template definitions
+- **Filldown control**: Manage variable persistence across lines
+- **Template management**: Create, update, delete, and share templates
 
-## License
+### **Integration Features**
+- **Seamless workflow chaining** between SuperSSH and Template Parser
+- **Dynamic template loading** with vendor and command filtering
+- **Error handling** with graceful fallbacks
+- **Performance optimization** for large outputs
 
-MIT License - see [LICENSE](LICENSE) file for details.
+## 🚨 Troubleshooting
 
-## Repository
+### **Common Issues & Solutions**
 
-[https://github.com/Sarryaz/SuperSSH](https://github.com/Sarryaz/SuperSSH)
+**"No templates found"**
+- Check if templates are properly loaded
+- Verify template vendor and command filters
+- Use "Manage Templates" to see available templates
 
-## Support
+**"Parsing failed"**
+- Enable debug mode to see parsing trace
+- Check if output format matches template patterns
+- Verify regex patterns in template
 
-For issues and feature requests, please use the GitHub repository.
+**"Template not working"**
+- Test with sample output first
+- Check variable names and patterns
+- Use template validation tools
+
+### **Debug Mode**
+Enable debug mode in the SSH Template Parser node to get detailed information about:
+- Which patterns matched
+- Variable extraction process
+- State transitions
+- Parsing errors
+
+## 🐛 Bug Reports & Beta Feedback
+
+**SSH Nexus is currently in beta** - your feedback is crucial for making it production-ready!
+
+### **How to Report Bugs**
+1. **Check existing issues** first to avoid duplicates
+2. **Provide detailed information**:
+   - n8n version
+   - Node.js version
+   - Exact error messages
+   - Steps to reproduce
+   - Sample data (if applicable)
+3. **Include workflow examples** when possible
+4. **Use the GitHub issues page** for formal bug reports
+
+### **What to Report**
+- **Connection issues** with specific devices
+- **Template parsing errors** with sample output
+- **Performance problems** with large outputs
+- **UI/UX issues** in the node configuration
+- **Integration problems** with other n8n nodes
+
+### **Beta Testing Tips**
+- Test with different device types and vendors
+- Try various command outputs and template combinations
+- Report any unexpected behavior or edge cases
+- Share successful workflows for the community
+
+## 🤝 Contributing to SSH Nexus
+
+We welcome contributions to make SSH Nexus even better:
+
+1. **Add new TextFSM templates** for different devices and commands
+2. **Improve existing templates** with better patterns
+3. **Report bugs** and suggest new features
+4. **Share workflows** that others might find useful
+
+### **Adding New Templates**
+1. Create a template following the structure above
+2. Test with real device output
+3. Submit a pull request or share the template
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Issues**: Report bugs and feature requests on GitHub
+- **Discussions**: Ask questions and share workflows
+- **Documentation**: Check this README and inline help
+
+---
+
+**SSH Nexus: Where SSH Operations Meet Intelligent Parsing**
+
+*Made with ❤️ for the n8n community*

@@ -1,0 +1,33 @@
+{
+  "id": "aruba_show_version_v1",
+  "name": "Aruba Show Version",
+  "vendor": "aruba",
+  "deviceOs": "aruba_os",
+  "command": "show version",
+  "description": "Parse Aruba version info",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^ArubaOS\s+\(?(?<image>[^)]+)\)?\s+\-\s+\s*Version\s+(?<version>[0-9.]+).*$",
+          "flags": "i",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^Build\s+Date:\s+(?<buildDate>.*)$",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-01-01T00:00:00.000Z",
+    "updated": "2025-01-01T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "auto",
+    "tested": false
+  }
+}

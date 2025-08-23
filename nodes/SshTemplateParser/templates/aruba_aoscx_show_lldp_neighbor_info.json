@@ -1,0 +1,15 @@
+{
+  "id": "aruba_aoscx_show_lldp_neighbor_info_v1",
+  "name": "AOS-CX Show LLDP Neighbor Info",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show lldp neighbor-info",
+  "description": "Parse LLDP neighbor info",
+  "states": [
+    {"name":"start","patterns":[
+      {"regex":"^(?<LOCAL_PORT>\\S+)\\s+(?<CHASSIS_ID>\\S+)\\s+(?<PORT_ID>\\S+)\\s+(?<PORT_DESC>\\S+)\\s+(?<TTL>\\d+)\\s+(?<SYS_NAME>\\S+)$","actions":[{"type":"emit"}],"transition":{"to":"self"}},
+      {"regex":"^(?<LOCAL_PORT>\\S+)\\s+(?<CHASSIS_ID>\\S+)\\s+(?<PORT_ID>\\S+)\\s+(?<TTL>\\d+)$","actions":[{"type":"emit"}],"transition":{"to":"self"}}
+    ]}
+  ],
+  "metadata": {"created":"2025-08-23T00:00:00.000Z","updated":"2025-08-23T00:00:00.000Z","version":"1.0.0","author":"community","tested":false}
+}
