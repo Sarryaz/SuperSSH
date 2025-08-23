@@ -1,0 +1,27 @@
+{
+  "id": "aruba_aoscx_show_mac_address_table_v1",
+  "name": "AOS-CX Show MAC Address Table",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show mac-address-table",
+  "description": "Parse MAC address table",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^(?<MAC_ADDRESS>\\S+)\\s+(?<VLAN_ID>\\d+)\\s+(?<TYPE>\\S+)\\s+(?<PORT>\\S+)$",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}

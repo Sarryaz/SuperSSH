@@ -1,0 +1,34 @@
+{
+  "id": "aruba_aoscx_show_interface_brief_v1",
+  "name": "AOS-CX Show Interface Brief",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show interface brief",
+  "description": "Parse interface brief table",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^(?<PORT>\\S+)\\s+(?<NATIVE_VLAN>\\d+)\\s+(?<MODE>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<ENABLED>yes|no)\\s+(?<STATUS>up|down)\\s+(?<SPEED>\\S+)\\s+(?<DESC>\\S+)$",
+          "flags": "i",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^(?<PORT>\\S+)\\s+(?<NATIVE_VLAN>\\d+)\\s+(?<MODE>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<ENABLED>yes|no)\\s+(?<STATUS>up|down)\\s+(?<REASON>.+)\\s+(?<SPEED>\\S+)\\s+(?<DESC>\\S+)$",
+          "flags": "i",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}

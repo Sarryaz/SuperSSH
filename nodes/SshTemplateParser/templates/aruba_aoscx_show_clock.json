@@ -1,0 +1,27 @@
+{
+  "id": "aruba_aoscx_show_clock_v1",
+  "name": "AOS-CX Show Clock",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show clock",
+  "description": "Parse system clock output",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^(?<DAYWEEK>\\w+)\\s+(?<MONTH>\\w+)\\s+(?<DAY>\\d+)\\s+(?<TIME>\\d+:\\d+:\\d+)\\s+(?<TIMEZONE>\\w+)\\s+(?<YEAR>\\d+)$",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}
