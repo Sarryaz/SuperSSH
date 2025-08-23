@@ -1,0 +1,34 @@
+{
+  "id": "aruba_show_interface_status_v1",
+  "name": "Aruba Show Interface Status",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show interface status",
+  "description": "Parse interface status table",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        { "regex": "^Port\s+Name\s+Status\s+Duplex\s+Speed\s+Type.*$", "flags": "i", "transition": { "to": "rows" } }
+      ]
+    },
+    {
+      "name": "rows",
+      "patterns": [
+        {
+          "regex": "^(?<port>\S+)\s+(?<name>\S+)\s+(?<status>up|down|admin-down)\s+(?<duplex>full|half|auto)\s+(?<speed>\S+)\s+(?<type>.*)$",
+          "flags": "i",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-01-01T00:00:00.000Z",
+    "updated": "2025-01-01T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "auto",
+    "tested": false
+  }
+}

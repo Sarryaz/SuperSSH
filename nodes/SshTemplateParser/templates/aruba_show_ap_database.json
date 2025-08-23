@@ -1,0 +1,39 @@
+{
+  "id": "aruba_show_ap_database_v1",
+  "name": "Aruba Show AP Database",
+  "vendor": "aruba",
+  "deviceOs": "aruba_os",
+  "command": "show ap database",
+  "description": "Parse Aruba 'show ap database' table rows",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^AP\s+Name\s+Group\s+AP\s+Type.*$",
+          "flags": "i",
+          "transition": { "to": "rows" }
+        }
+      ]
+    },
+    {
+      "name": "rows",
+      "patterns": [
+        {
+          "regex": "^(?<apName>\\S+)\\s+(?<group>\\S+)\\s+(?<apType>\\S+)\\s+(?<ip>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<status>\\S+).*$",
+          "actions": [
+            { "type": "emit" }
+          ],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-01-01T00:00:00.000Z",
+    "updated": "2025-01-01T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "auto",
+    "tested": false
+  }
+}

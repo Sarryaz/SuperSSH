@@ -1,0 +1,58 @@
+{
+  "id": "aruba_aoscx_show_aaa_authentication_port_access_interface_all_client_status_v1",
+  "name": "AOS-CX AAA Port-Access Client Status",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show aaa authentication port-access interface all client-status",
+  "description": "Parse AAA port-access client status across interfaces",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        { "regex": "^\\s*Port\\s+Access\\s+Client\\s+Status\\s+Details$", "transition": { "to": "start" } },
+        { "regex": "^\\s*Client\\s+(?<CLIENT_MAC>\\S+),\\s+(?<CLIENT_NAME>\\S+)$", "transition": { "to": "start" } },
+        { "regex": "^\\s*=+$", "transition": { "to": "start" } },
+        { "regex": "^\\s+Session\\s+Details$", "transition": { "to": "Session" } },
+        { "regex": "^\\s+Authentication\\s+Details$", "transition": { "to": "Authentication" } },
+        { "regex": "^\\s+Authorization\\s+Details$", "transition": { "to": "Authorization" } },
+        { "regex": "^\\s*$", "transition": { "to": "start" } }
+      ]
+    },
+    {
+      "name": "Session",
+      "patterns": [
+        { "regex": "^\\s*-+$", "transition": { "to": "Session" } },
+        { "regex": "^\\s+Port\\s*:\\s*(?<SESSION_PORT>\\S+)$", "transition": { "to": "Session" } },
+        { "regex": "^\\s+Session.*$", "transition": { "to": "Session" } },
+        { "regex": "^\\s+IPv4.*$", "transition": { "to": "Session" } },
+        { "regex": "^\\s+IPv6.*$", "transition": { "to": "Session" } },
+        { "regex": "^\\s*$", "transition": { "to": "start" } }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "patterns": [
+        { "regex": "^\\s*-+$", "transition": { "to": "Authentication" } },
+        { "regex": "^\\s+Status.*$", "transition": { "to": "Authentication" } },
+        { "regex": "^\\s+Auth\\s*Precedence.*$", "transition": { "to": "start" } },
+        { "regex": "^\\s*$", "transition": { "to": "start" } }
+      ]
+    },
+    {
+      "name": "Authorization",
+      "patterns": [
+        { "regex": "^\\s*-+$", "transition": { "to": "Authorization" } },
+        { "regex": "^\\s+Role\\s*:\\s*(?<ROLE>\\S+)$", "transition": { "to": "Authorization" } },
+        { "regex": "^\\s+Status.*$", "transition": { "to": "Authorization" } },
+        { "regex": "^\\s*$", "actions": [{ "type": "emit" }], "transition": { "to": "start" } }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}

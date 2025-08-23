@@ -1,0 +1,32 @@
+{
+  "id": "aruba_aoscx_show_arp_v1",
+  "name": "AOS-CX Show ARP",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show arp",
+  "description": "Parse ARP entries for AOS-CX",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<TYPE>\\S+)\\s+(?<FLAGS>\\S+)\\s+(?<HW_ADDRESS>\\S+)\\s+(?<MASK>\\S+)\\s+(?<DEVICE>\\S+)$",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<MAC_ADDRESS>\\S+)\\s+(?<PORT>\\S+)\\s+(?<PHYSICAL_PORT>\\S+)$",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}
