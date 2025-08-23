@@ -1,7 +1,7 @@
-import type { IExecuteFunctions, INodeType, INodeTypeDescription, IDataObject } from 'n8n-workflow';
+import type { IExecuteFunctions, INodeType, INodeTypeDescription, IDataObject, ILoadOptionsFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import { TemplateManager } from './TemplateManager';
-import { TextFsmEngine } from './TextFsmEngine';
+import { TextFsmEngine, type EngineOptions } from './TextFsmEngine';
 import type { Template } from './types/template';
 import { buildTemplateFromParams } from './TemplateBuilder';
 
@@ -32,6 +32,29 @@ export class SshTemplateParser implements INodeType {
 			},
 			// Parse Output
 			{
+				displayName: 'Vendor Filter',
+				name: 'vendorFilter',
+				type: 'options',
+				displayOptions: { show: { operation: ['parseOutput'] } },
+				options: [
+					{ name: 'Any', value: 'any' },
+					{ name: 'Aruba', value: 'aruba' },
+					{ name: 'Cisco', value: 'cisco' },
+					{ name: 'Juniper', value: 'juniper' },
+					{ name: 'Generic', value: 'generic' },
+				],
+				default: 'any',
+				description: 'Filter templates by vendor',
+			},
+			{
+				displayName: 'Command Contains',
+				name: 'commandFilter',
+				type: 'string',
+				displayOptions: { show: { operation: ['parseOutput'] } },
+				default: '',
+				description: 'Filter templates by command substring',
+			},
+			{
 				displayName: 'Template',
 				name: 'templateId',
 				type: 'options',
@@ -41,12 +64,24 @@ export class SshTemplateParser implements INodeType {
 				description: 'Template to use for parsing',
 			},
 			{
+				displayName: 'Output Mode',
+				name: 'outputMode',
+				type: 'options',
+				displayOptions: { show: { operation: ['parseOutput'] } },
+				options: [
+					{ name: 'Single Item (records array)', value: 'single' },
+					{ name: 'Split Items (one per record)', value: 'split' },
+				],
+				default: 'single',
+			},
+			{
 				displayName: 'Text Source',
 				name: 'textSource',
 				type: 'options',
 				displayOptions: { show: { operation: ['parseOutput'] } },
 				options: [
 					{ name: 'Input Field', value: 'field' },
+					{ name: 'JSON Path', value: 'jsonpath' },
 					{ name: 'String', value: 'string' },
 				],
 				default: 'field',
@@ -60,12 +95,49 @@ export class SshTemplateParser implements INodeType {
 				description: 'Name of the input field containing text to parse',
 			},
 			{
+				displayName: 'Field Path (dot notation)',
+				name: 'fieldPath',
+				type: 'string',
+				displayOptions: { show: { operation: ['parseOutput'], textSource: ['jsonpath'] } },
+				default: 'data.output',
+			},
+			{
 				displayName: 'Input Text',
 				name: 'inputText',
 				type: 'string',
 				typeOptions: { rows: 5 },
 				displayOptions: { show: { operation: ['parseOutput'], textSource: ['string'] } },
 				default: '',
+			},
+			{
+				displayName: 'Enable Debug Trace',
+				name: 'debug',
+				type: 'boolean',
+				displayOptions: { show: { operation: ['parseOutput'] } },
+				default: false,
+			},
+			{
+				displayName: 'Fail if No Match',
+				name: 'failOnNoMatch',
+				type: 'boolean',
+				displayOptions: { show: { operation: ['parseOutput'] } },
+				default: false,
+				description: 'Throw an error if parsing yields zero records',
+			},
+			{
+				displayName: 'Reset Fields On Emit (disable filldown)',
+				name: 'resetOnEmit',
+				type: 'boolean',
+				displayOptions: { show: { operation: ['parseOutput'] } },
+				default: false,
+			},
+			{
+				displayName: 'Coerce Variable Types',
+				name: 'coerceTypes',
+				type: 'boolean',
+				displayOptions: { show: { operation: ['parseOutput'] } },
+				default: false,
+				description: 'Use variable type info in template to coerce values',
 			},
 
 			// Create Template (form/json)
@@ -188,11 +260,16 @@ export class SshTemplateParser implements INodeType {
 
 	methods = {
 		loadOptions: {
-			async getTemplates(this: unknown) {
+			async getTemplates(this: ILoadOptionsFunctions) {
 				const mgr = new TemplateManager();
 				await mgr.init();
 				const templates = await mgr.list();
-				return templates.map((t) => ({ name: `${t.vendor}:${t.name}`, value: t.id }));
+				const vendor = (this.getCurrentNodeParameter('vendorFilter') as string) || 'any';
+				const cmd = ((this.getCurrentNodeParameter('commandFilter') as string) || '').toLowerCase();
+				return templates
+					.filter((t) => (vendor === 'any' ? true : t.vendor === (vendor as any)))
+					.filter((t) => (cmd ? (t.command || '').toLowerCase().includes(cmd) : true))
+					.map((t) => ({ name: `${t.vendor}:${t.name}`, value: t.id }));
 			},
 		},
 	};
@@ -211,20 +288,47 @@ export class SshTemplateParser implements INodeType {
 
 			const textSource = this.getNodeParameter('textSource', 0) as string;
 			const fieldName = this.getNodeParameter('fieldName', 0, 'data') as string;
+			const fieldPath = this.getNodeParameter('fieldPath', 0, 'data.output') as string;
 			const inputTextParam = this.getNodeParameter('inputText', 0, '') as string;
+			const outputMode = this.getNodeParameter('outputMode', 0, 'single') as string;
+			const debug = this.getNodeParameter('debug', 0, false) as boolean;
+			const failOnNoMatch = this.getNodeParameter('failOnNoMatch', 0, false) as boolean;
+			const resetOnEmit = this.getNodeParameter('resetOnEmit', 0, false) as boolean;
+			const coerceTypes = this.getNodeParameter('coerceTypes', 0, false) as boolean;
 
-			const out = [] as IDataObject[];
+			const out: IDataObject[] = [];
+			const getByPath = (obj: IDataObject, path: string): unknown => {
+				const parts = path.split('.');
+				let cur: unknown = obj;
+				for (const p of parts) {
+					if (cur && typeof cur === 'object' && p in (cur as any)) cur = (cur as any)[p];
+					else return undefined;
+				}
+				return cur;
+			};
+
 			for (let i = 0; i < items.length; i += 1) {
 				let text = '';
 				if (textSource === 'string') {
 					text = inputTextParam;
-				} else {
+				} else if (textSource === 'field') {
 					const data = items[i].json as IDataObject;
 					const v = data[fieldName];
 					text = typeof v === 'string' ? v : JSON.stringify(v ?? '');
+				} else {
+					const data = items[i].json as IDataObject;
+					text = String(getByPath(data, fieldPath) ?? '');
 				}
-				const result = engine.parseOutput(text, template as Template);
-				out.push({ result });
+				const options: EngineOptions = { debug, resetOnEmit, coerceTypes };
+				const result = engine.parseOutput(text, template as Template, options);
+				if (failOnNoMatch && (!result.records || result.records.length === 0)) {
+					throw new NodeOperationError(this.getNode(), 'No records parsed');
+				}
+				if (outputMode === 'split') {
+					for (const rec of result.records) out.push(rec as unknown as IDataObject);
+				} else {
+					out.push({ result: result as unknown as IDataObject });
+				}
 			}
 			return [out.map((o) => ({ json: o }))];
 		}
@@ -243,7 +347,6 @@ export class SshTemplateParser implements INodeType {
 				return [[{ json: { ok: true, id: saved.id, name: saved.name } }]];
 			}
 
-			// form mode
 			const name = this.getNodeParameter('templateName', 0) as string;
 			const vendor = this.getNodeParameter('vendor', 0) as string;
 			const deviceOs = this.getNodeParameter('deviceOs', 0, '') as string;
