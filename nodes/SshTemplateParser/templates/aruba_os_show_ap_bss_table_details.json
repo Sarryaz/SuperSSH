@@ -1,0 +1,161 @@
+{
+  "id": "aruba_os_show_ap_bss_table_details_v1",
+  "name": "Aruba OS Show AP BSS Table Details",
+  "vendor": "aruba",
+  "deviceOs": "aruba_os",
+  "command": "show ap bss-table details",
+  "description": "Parse AP BSS table details for Aruba OS",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^bss\\s+ess\\s+port\\s+ip\\s+phy\\s*",
+          "actions": [{ "type": "next", "to": "before_arubaos_8_9" }],
+          "transition": { "to": "before_arubaos_8_9" }
+        },
+        {
+          "regex": "^bss\\s+ess\\s+port\\s+ip\\s+band\\s*",
+          "actions": [{ "type": "next", "to": "after_arubaos_8_9" }],
+          "transition": { "to": "after_arubaos_8_9" }
+        },
+        {
+          "regex": "^Aruba AP",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^.+\\..+",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^bss",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^fm",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s+$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^cluster",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Channel",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\"Spectrum\"",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Num",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Flags",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^-+",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        }
+      ]
+    },
+    {
+      "name": "before_arubaos_8_9",
+      "patterns": [
+        {
+          "regex": "^-+\\s+-+",
+          "actions": [{ "type": "next", "to": "before_arubaos_8_9" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^(?<BSS>[a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5})\\s+(?<ESS>\\S+(\\s\\S+){0,})\\s+(?<PORT>\\S+)\\s+(?<IP_ADDRESS>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<PHY>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<CHANNEL>\\S+)\\s+(?<CUR_CL>\\S+)\\s+(?<AP_NAME>\\S+)\\s+(?<IN_T>\\S+)\\s+(?<TOT_T>\\S+)\\s+(?<MTU>(\\d+|N/A|.*?))\\s+(?<ACL_STATE>\\S+)\\s+(?<ACL>\\S+)\\s+(?<FM>\\S+)\\s+(?<FLAGS>(\\S+|.*?))\\s+(?<CLUSTER>((A|sA|sU|U|N/A).*?))",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^Aruba AP",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^-\\s*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^bss",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Channel",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Num",
+          "actions": [{ "type": "next", "to": "end" }],
+          "transition": { "to": "end" }
+        }
+      ]
+    },
+    {
+      "name": "after_arubaos_8_9",
+      "patterns": [
+        {
+          "regex": "^-+\\s+-+",
+          "actions": [{ "type": "next", "to": "after_arubaos_8_9" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^(?<BSS>[a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5})\\s+(?<ESS>\\S+(\\s\\S+){0,})\\s+(?<PORT>\\S+)\\s+(?<IP_ADDRESS>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<BAND>(((2\\.4|5|6).*z)|N/A))\\s+(?<CHANNEL>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<CUR_CL>\\S+)\\s+(?<AP_NAME>\\S+)\\s+(?<IN_T>\\S+)\\s+(?<TOT_T>\\S+)\\s+(?<MTU>(\\d+|N/A|.*?))\\s+(?<ACL_STATE>\\S+)\\s+(?<ACL>\\S+)\\s+(?<FM>\\S+)\\s+(?<FLAGS>(\\S+|.*?))\\s+(?<CLUSTER>((A|sA|sU|U|N/A).*?))\\s+(?<ACTIVE_CLIENTS>\\S+)\\s+(?<STANDBY_CLIENTS>\\S+)\\s+(?<DATAZONE>\\S+)",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^Channel",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Num",
+          "actions": [{ "type": "next", "to": "end" }],
+          "transition": { "to": "end" }
+        }
+      ]
+    },
+    {
+      "name": "end",
+      "patterns": []
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}

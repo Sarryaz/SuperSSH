@@ -1,0 +1,47 @@
+{
+  "id": "aruba_os_show_ipv6_interface_brief_v1",
+  "name": "Aruba OS Show IPv6 Interface Brief",
+  "vendor": "aruba",
+  "deviceOs": "aruba_os",
+  "command": "show ipv6 interface brief",
+  "description": "Parse IPv6 interface brief for Aruba OS",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^(?<INTERFACE>\\S+\\s\\S+|\\S+)\\s+\\[\\s+(?<ADMIN>\\S+)/(?<PROTOCOL>\\S+)\\s+\\]\\s*",
+          "actions": [{ "type": "next", "to": "interfaces" }],
+          "transition": { "to": "interfaces" }
+        }
+      ]
+    },
+    {
+      "name": "interfaces",
+      "patterns": [
+        {
+          "regex": "^(\\S+\\s\\S+|\\S+)\\s+\\[\\s+(\\S+)/(\\S+)\\s+\\]\\s*",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^(?<INTERFACE>\\S+\\s\\S+|\\S+)\\s+\\[\\s+(?<ADMIN>\\S+)/(?<PROTOCOL>\\S+)\\s+\\]\\s*",
+          "actions": [{ "type": "next", "to": "interfaces" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+(?<IPV6_ADDRESS>\\S+)\\s*",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}

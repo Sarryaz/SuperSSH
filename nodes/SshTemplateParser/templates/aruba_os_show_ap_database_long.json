@@ -1,16 +1,16 @@
 {
-  "id": "aruba_show_ap_database_v1",
-  "name": "Aruba Show AP Database",
+  "id": "aruba_os_show_ap_database_long_v1",
+  "name": "Aruba OS Show AP Database Long",
   "vendor": "aruba",
   "deviceOs": "aruba_os",
-  "command": "show ap database",
-  "description": "Parse AP database for Aruba OS",
+  "command": "show ap database long",
+  "description": "Parse AP database long output for Aruba OS",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<AP_NAME>\\S+)\\s+(?<GROUP>\\S+)\\s+(?<AP_MODEL>\\S+)\\s+(?<IP_ADDRESS>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<STATUS>.+?)\\s+(?<FLAGS>\\S+)\\s+(?<PRIMARY>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<STANDBY>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))",
+          "regex": "^(?<AP_NAME>\\S+)\\s+(?<GROUP>\\S+)\\s+(?<AP_MODEL>\\S+)\\s+(?<IP_ADDRESS>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<STATUS>.+?)\\s+(?<FLAGS>\\S+)\\s+(?<PRIMARY>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<STANDBY>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<MAC_ADDRESS>[a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5})\\s+(?<SERIAL>\\S+)\\s+(?<PORT>.+?)\\s+(?<FQLN>.+?)\\s+(?<OUTER_IP>.+?)\\s+(?<USER>.+?)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         },
@@ -25,7 +25,7 @@
           "transition": { "to": "start" }
         },
         {
-          "regex": "^Name\\s+Group\\s+AP Type\\s+IP Address\\s+Status\\s+Flags\\s+Switch IP\\s+Standby IP",
+          "regex": "^Name\\s+Group\\s+AP Type\\s+IP Address\\s+Status\\s+Flags\\s+Switch IP\\s+Standby IP\\s+Wired MAC Address\\s+Serial #\\s+Port\\s+FQLN\\s+Outer IP\\s+User",
           "actions": [{ "type": "next", "to": "start" }],
           "transition": { "to": "start" }
         },

@@ -4,13 +4,13 @@
   "vendor": "aruba",
   "deviceOs": "aruba_aoscx",
   "command": "show clock",
-  "description": "Parse system clock output",
+  "description": "Parse system clock for AOS-CX",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<DAYWEEK>\\w+)\\s+(?<MONTH>\\w+)\\s+(?<DAY>\\d+)\\s+(?<TIME>\\d+:\\d+:\\d+)\\s+(?<TIMEZONE>\\w+)\\s+(?<YEAR>\\d+)$",
+          "regex": "^(?<DAYWEEK>\\w\\w\\w)\\s(?<MONTH>\\w\\w\\w)\\s(?<DAY>\\d+)\\s(?<TIME>\\d+:\\d+:\\d+)\\s(?<TIMEZONE>\\w+)\\s(?<YEAR>\\d+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         }

@@ -1,0 +1,68 @@
+{
+  "id": "aruba_aoscx_show_bfd_all_vrfs_v1",
+  "name": "AOS-CX Show BFD All VRFs",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show bfd all-vrfs",
+  "description": "Parse BFD all VRFs for AOS-CX",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^Admin\\s+status:\\s+(?<ADMIN_STATUS>\\w+)",
+          "actions": [{ "type": "filldown", "variable": "ADMIN_STATUS" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^Echo\\s+source\\s+IP:\\s+(?<SRC_IP>\\S+)",
+          "actions": [{ "type": "filldown", "variable": "SRC_IP" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^Statistics:.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Total.*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Session\\s+Interface\\s+VRF\\s+Source\\s+IP\\s+Destination\\s+IP\\s+Echo\\s+State\\s+Protocol",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*-+",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^(?<SESSION>\\d+)\\s+(?<INTERFACE>\\S+)\\s+(?<VRF>\\S+)\\s+(?<SOURCE_IP>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<DESTINATION_IP>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<ECHO>\\w+)\\s+(?<STATE>\\w+)\\s+(?<APPLICATION>\\w+)",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}
+

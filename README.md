@@ -343,3 +343,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **SSH Nexus: Where SSH Operations Meet Intelligent Parsing**
 
 *Made with ❤️ for the n8n community*
+
+---
+
+Repository: https://github.com/Sarryaz/SSH-Nexus

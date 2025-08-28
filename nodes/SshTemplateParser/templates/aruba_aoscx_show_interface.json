@@ -1,0 +1,498 @@
+{
+  "id": "aruba_aoscx_show_interface_v1",
+  "name": "AOS-CX Show Interface",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show interface",
+  "description": "Parse interface details for AOS-CX",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^\\s*(Interface|Aggregate)\\s+\\S+\\s+is",
+          "actions": [{ "type": "continue", "variable": "record" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(Interface|Aggregate)\\s+(?<INTERFACE>\\S+)\\s+is\\s+(?<LINK_STATUS>\\w+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Admin\\s*state\\s*is\\s*(?<LINK_ADMIN>\\w+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Link\\s*transitions\\s*:\\s*(?<LINK_TRANSITIONS>\\d+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Description\\s*:\\s*(?<INTERFACE_DESC>.*)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*State\\s*information\\s*:\\s*(?<LINK_STATE_INFO>.*)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Hardware\\s*:\\s*(?<HW_TYPE>\\w+),?\\s*MAC\\s*Address:\\s+(?<MAC_ADDRESS>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*MAC\\s+Address\\s*:\\s*(?<MAC_ADDRESS>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*IPv4\\s+address\\s+(?<IP_ADDRESS>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*MTU\\s*(?<MTU>\\d+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Type\\s*(?<IF_TYPE>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*(?<DUPLEX>\\w+)-duplex",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*qos\\s*trust\\s*(?<QOS_TRUST>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Speed\\s*:*\\s*(?<SPEED>\\S+\\s\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Auto-negotiation\\s*is\\s*(?<AUTO_NEG>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Flow-control\\s*:\\s*(?<FLOW_CONTROL>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Error-control\\s*:\\s*(?<ERROR_CONTROL>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*VLAN Mode\\s*:\\s*(?<VLAN_MODE>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Access VLAN\\s*:\\s*(?<VLAN_ACCESS>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Native VLAN\\s*:\\s*(?<VLAN_NATIVE>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Allowed VLAN List\\s*:\\s+(?<VLAN_TRUNK>[^,]+),*",
+          "actions": [{ "type": "continue", "variable": "VLAN_TRUNK" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Allowed VLAN List\\s*:\\s+(?:[^,]+,){1}(?<VLAN_TRUNK>[^,]+),*",
+          "actions": [{ "type": "continue", "variable": "VLAN_TRUNK" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Allowed VLAN List\\s*:\\s+(?:[^,]+,){2}(?<VLAN_TRUNK>[^,]+),*",
+          "actions": [{ "type": "continue", "variable": "VLAN_TRUNK" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Allowed VLAN List\\s*:\\s+(?:[^,]+,){3}(?<VLAN_TRUNK>[^,]+),*",
+          "actions": [{ "type": "continue", "variable": "VLAN_TRUNK" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Allowed VLAN List\\s*:\\s+(?:[^,]+,){4}(?<VLAN_TRUNK>[^,]+),*",
+          "actions": [{ "type": "continue", "variable": "VLAN_TRUNK" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Allowed VLAN List\\s*:\\s+(?:[^,]+,){5}(?<VLAN_TRUNK>[^,]+),*",
+          "actions": [{ "type": "continue", "variable": "VLAN_TRUNK" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Allowed VLAN List\\s*:",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Link state",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?:\\S+\\s+){1}(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?:\\S+\\s+){2}(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?:\\S+\\s+){3}(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?:\\S+\\s+){4}(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?:\\S+\\s+){5}(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?:\\S+\\s+){6}(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:\\s+(?:\\S+\\s+){7}(?<AGGREGATED_INTERFACES>\\S+)\\s*",
+          "actions": [{ "type": "continue", "variable": "AGGREGATED_INTERFACES" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Aggregated-interfaces\\s*:",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Aggregation-key",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Aggregate\\s+mode",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Persona",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*rate-limit\\s+broadcast",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*L3\\s+Counters",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*MDI mode",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Rate collection interval",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Energy-Efficient",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Rx",
+          "actions": [{ "type": "next", "to": "rx" }],
+          "transition": { "to": "rx" }
+        },
+        {
+          "regex": "^\\s*Rate\\s+RX\\s+TX\\s+Total",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "rate" }
+        },
+        {
+          "regex": "^\\s*Statistic\\s+RX\\s+TX\\s+Total",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "statistic" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        }
+      ]
+    },
+    {
+      "name": "rx",
+      "patterns": [
+        {
+          "regex": "^\\s*(?<RX_TOTAL_PACKETS>\\d+)\\s+total\\s+packets\\s*(?<RX_TOTAL_BYTES>\\d+)\\s+total\\s+bytes",
+          "actions": [{ "type": "next", "to": "rx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<RX_UNICAST_PACKETS>\\d+)\\s+unicast\\s+packets",
+          "actions": [{ "type": "next", "to": "rx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<RX_MCAST_PACKETS>\\d+)\\s+multicast\\s+packets",
+          "actions": [{ "type": "next", "to": "rx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<RX_BROADCAST_PACKETS>\\d+)\\s+broadcast\\s+packets",
+          "actions": [{ "type": "next", "to": "rx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<RX_ERRORS>\\d+)\\s+errors\\s*(?<RX_DROPPED>\\d+)\\s+dropped",
+          "actions": [{ "type": "next", "to": "rx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<RX_CRC_FCS>\\d+)\\s+CRC\\/FCS",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "tx" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "rx" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    },
+    {
+      "name": "tx",
+      "patterns": [
+        {
+          "regex": "^\\s*(?<TX_TOTAL_PACKETS>\\d+)\\s+total\\s+packets\\s*(?<TX_TOTAL_BYTES>\\d+)\\s+total\\s+bytes",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<TX_UNICAST_PACKETS>\\d+)\\s+unicast\\s+packets",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<TX_MCAST_PACKETS>\\d+)\\s+multicast\\s+packets",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<TX_BROADCAST_PACKETS>\\d+)\\s+broadcast\\s+packets",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<TX_ERRORS>\\d+)\\s+errors\\s*(?<TX_DROPPED>\\d+)\\s+dropped",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<TX_CRC_FCS>\\S+)\\s+CRC\\/FCS",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*(?<TX_COLLISION>\\d+)\\s+collision",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "tx" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    },
+    {
+      "name": "rate",
+      "patterns": [
+        {
+          "regex": "^\\s*----",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Mbits\\s+\\/\\s+sec",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*KPkts\\s+\\/\\s+sec",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Unicast",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Multicast",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Broadcast",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Utilization",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "statistic" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "rate" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    },
+    {
+      "name": "statistic",
+      "patterns": [
+        {
+          "regex": "^\\s*Statistic\\s+RX\\s+TX\\s+Total",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*----",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Packets\\s+(?<RX_TOTAL_PACKETS>\\d+)\\s+(?<TX_TOTAL_PACKETS>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Unicast\\s+(?<RX_UNICAST_PACKETS>\\d+)\\s+(?<TX_UNICAST_PACKETS>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Multicast\\s+(?<RX_MCAST_PACKETS>\\d+)\\s+(?<TX_MCAST_PACKETS>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Broadcast\\s+(?<RX_BROADCAST_PACKETS>\\d+)\\s+(?<TX_BROADCAST_PACKETS>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Bytes\\s+(?<RX_TOTAL_BYTES>\\d+)\\s+(?<TX_TOTAL_BYTES>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Jumbos",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Pause\\s+Frames",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Dropped\\s+(?<RX_DROPPED>\\d+)\\s+(?<TX_DROPPED>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Errors\\s+(?<RX_ERRORS>\\d+)\\s+(?<TX_ERRORS>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+CRC\\/FCS\\s+(?<RX_CRC_FCS>\\d+)\\s+(?<TX_CRC_FCS>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Collision\\s+\\S+\\s+(?<TX_COLLISION>\\d+)\\s+\\d+",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Runts",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*Giants",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*L3\\s+Packets",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "statistic" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}
+

@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-ssh-nexus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Enhanced SSH operations with TextFSM template parsing capabilities for network device automation",
   "keywords": [
     "n8n",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/n8n-nodes-ssh-nexus.git"
+    "url": "git+https://github.com/Sarryaz/SSH-Nexus.git"
   },
   "main": "index.js",
   "types": "index.d.ts",
@@ -32,7 +32,7 @@
     "dev": "tsc --watch",
     "format": "prettier nodes credentials package.json",
     "lint": "eslint nodes credentials package.json",
-    		"prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build",
     "test": "jest"
   },
   "files": [
@@ -51,6 +51,10 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
     "typescript": "~4.8.4"
   },
   "dependencies": {

@@ -1,0 +1,98 @@
+{
+  "id": "aruba_aoscx_show_bgp_all_all_vrfs_summary_v1",
+  "name": "AOS-CX Show BGP All All VRFs Summary",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show bgp all all-vrfs summary",
+  "description": "Parse BGP all all VRFs summary for AOS-CX",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^VRF\\s+:\\s+(?<VRF>\\S+)",
+          "actions": [{ "type": "filldown", "variable": "VRF" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^BGP\\sSummary",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^-+",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Local\\s*AS.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Peers.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Cfg.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Address-family\\s:\\s(?<AF>\\S+)",
+          "actions": [{ "type": "filldown", "variable": "AF" }],
+          "transition": { "to": "af" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        }
+      ]
+    },
+    {
+      "name": "af",
+      "patterns": [
+        {
+          "regex": "^-+",
+          "actions": [{ "type": "next", "to": "af" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Neighbor\\s+Remote-AS\\s+MsgRcvd\\s+MsgSent\\s+Up\\/Down\\s+Time\\s+State\\s+AdminStatus",
+          "actions": [{ "type": "next", "to": "af" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+(?<NEIGHBOUR>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<REMOTE_AS>\\d+)\\s+\\d+\\s+\\d+\\s+\\S+\\s+(?<STATE>\\w+)\\s+(?<ADMIN_STATUS>\\w+)",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "clear", "variable": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "af" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}
+

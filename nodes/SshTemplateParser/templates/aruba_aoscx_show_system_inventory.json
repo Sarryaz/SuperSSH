@@ -1,33 +1,33 @@
 {
-  "id": "aruba_show_interface_status_v1",
-  "name": "Aruba Show Interface Status",
+  "id": "aruba_aoscx_show_system_inventory_v1",
+  "name": "AOS-CX Show System Inventory",
   "vendor": "aruba",
-  "deviceOs": "aruba_os",
-  "command": "show interface status",
-  "description": "Parse interface status for Aruba OS",
+  "deviceOs": "aruba_aoscx",
+  "command": "show system inventory",
+  "description": "Parse system inventory for AOS-CX",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<PORT>\\S+)\\s+(?<NAME>\\S+)\\s+(?<STATUS>\\S+)\\s+(?<VLAN>\\S+)\\s+(?<DUPLEX>\\S+)\\s+(?<SPEED>\\S+)\\s+(?<TYPE>\\S+)",
+          "regex": "^Type.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s+Number\\s+Number\\s+Version.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^----.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^(?<TYPE>.{20})\\s(?<LOCATION>.{8})\\s(?<PRODUCT_NUM>.{10})\\s(?<DESC>.{50})\\s(?<SERIAL_NUM>.{15})\\s(?<HARDWARE_VER>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
-        },
-        {
-          "regex": "^Port\\s+Name\\s+Status\\s+Vlan\\s+Duplex\\s+Speed\\s+Type",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
-        },
-        {
-          "regex": "^\\s*$$",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
-        },
-        {
-          "regex": "^\\s+$",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
         }
       ]
     }

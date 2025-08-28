@@ -1,0 +1,28 @@
+{
+  "id": "aruba_aoscx_show_ip_route_all_vrfs_v1",
+  "name": "AOS-CX Show IP Route All VRFs",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show ip route all-vrfs",
+  "description": "Parse IP route all VRFs for AOS-CX",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^(?<PREFIX>\\d+\\.\\d+\\.\\d+\\.\\d+\\/\\d+)\\s+(?<NEXTHOP>\\d+\\.\\d+\\.\\d+\\.\\d+|-)\\s+(?<INTERFACE>\\S+)\\s+(?<VRF_EGRESS>\\S+)\\s+(?<ORIGIN_TYPE>\\S+\\/\\S+)\\s+(?<DISTANCE_METRIC>\\[\\d+\\/\\d+\\])\\s+(?<AGE>\\S+)",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}
+

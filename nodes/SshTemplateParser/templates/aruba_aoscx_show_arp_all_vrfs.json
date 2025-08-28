@@ -4,21 +4,40 @@
   "vendor": "aruba",
   "deviceOs": "aruba_aoscx",
   "command": "show arp all-vrfs",
-  "description": "Parse ARP entries across VRFs",
+  "description": "Parse ARP all VRFs for AOS-CX",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<MAC_ADDRESS>\\S+)\\s+(?<PORT_ID>\\S+)\\s+(?<PHYSICAL_PORT>\\S+)\\s+(?<STATE>[a-z]+)\\s+(?<VRF>\\S+)$",
-          "flags": "i",
+          "regex": "^IPv4\\s+Address\\s+MAC\\s+Port\\s+Physical\\s+Port\\s+State",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<MAC_ADDRESS>\\S+)\\s+(?<PORT_ID>\\S+)\\s+(?<PHYSICAL_PORT>\\S+)\\s+(?<STATE>[a-z]+)\\s+(?<VRF>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         },
         {
-          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<TYPE>\\S+)\\s+(?<FLAGS>\\S+)\\s+(?<HW_ADDRESS>\\S+)\\s+(?<MASK>\\S+)\\s+(?<DEVICE>\\S+)$",
+          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<TYPE>\\S+)\\s+(?<FLAGS>\\S+)\\s+(?<HW_ADDRESS>\\S+)\\s+(?<MASK>\\S+)\\s+(?<DEVICE>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*-*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Total.*",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
         }
       ]
     }

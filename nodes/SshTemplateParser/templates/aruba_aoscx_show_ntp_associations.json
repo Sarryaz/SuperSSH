@@ -1,0 +1,37 @@
+{
+  "id": "aruba_aoscx_show_ntp_associations_v1",
+  "name": "AOS-CX Show NTP Associations",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show ntp associations",
+  "description": "Parse NTP associations for AOS-CX",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^-+",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s+ID\\s+NAME\\s+REMOTE\\s+REF-ID\\s+ST\\s+LAST\\s+POLL\\s+REACH",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^(?<ID>\\W?\\s+\\d+)\\s+(?<NAME>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<REMOTE>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<REF_ID>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<STRATUM>\\d+)\\s+(?<LAST>\\d+)\\s+(?<POLL>\\d+)\\s+(?<REACH>\\d+)",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}

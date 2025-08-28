@@ -4,19 +4,18 @@
   "vendor": "aruba",
   "deviceOs": "aruba_os",
   "command": "show version",
-  "description": "Parse Aruba version info",
+  "description": "Parse version information for Aruba OS",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^ArubaOS\s+\(?(?<image>[^)]+)\)?\s+\-\s+\s*Version\s+(?<version>[0-9.]+).*$",
-          "flags": "i",
+          "regex": "^Aruba\\s+(?<MODEL>\\S+)\\s+(?<VERSION>\\S+)\\s+(?<BUILD>\\S+)\\s+(?<DATE>\\S+)\\s+(?<TIME>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         },
         {
-          "regex": "^Build\s+Date:\s+(?<buildDate>.*)$",
+          "regex": "^Aruba\\s+(?<MODEL>\\S+)\\s+(?<VERSION>\\S+)\\s+(?<BUILD>\\S+)\\s+(?<DATE>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         }
@@ -24,10 +23,10 @@
     }
   ],
   "metadata": {
-    "created": "2025-01-01T00:00:00.000Z",
-    "updated": "2025-01-01T00:00:00.000Z",
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
     "version": "1.0.0",
-    "author": "auto",
+    "author": "community",
     "tested": false
   }
 }

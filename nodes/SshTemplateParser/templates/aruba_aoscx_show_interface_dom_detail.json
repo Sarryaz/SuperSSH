@@ -1,0 +1,328 @@
+{
+  "id": "aruba_aoscx_show_interface_dom_detail_v1",
+  "name": "AOS-CX Show Interface DOM Detail",
+  "vendor": "aruba",
+  "deviceOs": "aruba_aoscx",
+  "command": "show interface dom detail",
+  "description": "Parse interface DOM detail for AOS-CX",
+  "states": [
+    {
+      "name": "start",
+      "patterns": [
+        {
+          "regex": "^Transceiver",
+          "actions": [{ "type": "continue", "variable": "record" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^Transceiver\\s+in\\s+(?<INTERFACE>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s+Type:\\s(?<IFACE_TYPE>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s+% No DOM information available",
+          "actions": [{ "type": "next", "variable": "clear", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s+Temperature:\\s+(?<TEMPERATURE>-?\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "common" }
+        },
+        {
+          "regex": "^\\s+Channel\\s+(?<CHANNEL>\\d+):",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "common" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        }
+      ]
+    },
+    {
+      "name": "common",
+      "patterns": [
+        {
+          "regex": "^\\s+Temperature high alarm: (?<TEMP_HIGH_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Temperature low alarm: (?<TEMP_LOW_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Temperature high warning: (?<TEMP_HIGH_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Temperature low warning: (?<TEMP_LOW_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Temperature high alarm threshold: (?<TEMP_HIGH_ALARM_THRESHOLD>-?\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Temperature low alarm threshold: (?<TEMP_LOW_ALARM_THRESHOLD>-?\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Temperature high warning threshold: (?<TEMP_HIGH_WARN_THRESHOLD>-?\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Temperature low warning threshold: (?<TEMP_LOW_WARN_THRESHOLD>-?\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage:\\s+(?<VOLTAGE>\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage high alarm: (?<VOLT_HIGH_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage low alarm: (?<VOLT_LOW_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage high warning: (?<VOLT_HIGH_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage low warning: (?<VOLT_LOW_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage high alarm threshold: (?<VOLT_HIGH_ALARM_THRESHOLD>\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage low alarm threshold: (?<VOLT_LOW_ALARM_THRESHOLD>\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage high warning threshold: (?<VOLT_HIGH_WARN_THRESHOLD>\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Voltage low warning threshold: (?<VOLT_LOW_WARN_THRESHOLD>\\d+\\.\\d+\\w)",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias: (?<TX_BIAS>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "details" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "common" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    },
+    {
+      "name": "details",
+      "patterns": [
+        {
+          "regex": "^\\s+Channel\\s+(?<CHANNEL>\\d+):",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias: (?<TX_BIAS>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias high alarm: (?<TX_BIAS_HIGH_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias low alarm: (?<TX_BIAS_LOW_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias high warning: (?<TX_BIAS_HIGH_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias low warning: (?<TX_BIAS_LOW_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias high alarm threshold: (?<TX_BIAS_HIGH_ALARM_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias low alarm threshold: (?<TX_BIAS_LOW_ALARM_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias high warning threshold: (?<TX_BIAS_HIGH_WARN_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Bias low warning threshold: (?<TX_BIAS_LOW_WARN_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power: (?<RX_MW>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power high alarm: (?<RX_HIGH_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power low alarm: (?<RX_LOW_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power high warning: (?<RX_HIGH_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power low warning: (?<RX_LOW_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power high alarm threshold: (?<RX_HIGH_ALARM_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power low alarm threshold: (?<RX_LOW_ALARM_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power high warning threshold: (?<RX_HIGH_WARN_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Rx Power low warning threshold: (?<RX_LOW_WARN_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power: (?<TX_MW>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power high alarm: (?<TX_HIGH_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power low alarm: (?<TX_LOW_ALARM_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power high warning: (?<TX_HIGH_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power low warning: (?<TX_LOW_WARN_TRIG>\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power high alarm threshold: (?<TX_HIGH_ALARM_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power low alarm threshold: (?<TX_LOW_ALARM_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power high warning threshold: (?<TX_HIGH_WARN_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s+Tx Power low warning threshold: (?<TX_LOW_WARN_THRESHOLD>\\d+\\.\\d+\\w+)",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^Transceiver",
+          "actions": [{ "type": "continue", "variable": "record" }],
+          "transition": { "to": "self" }
+        },
+        {
+          "regex": "^Transceiver\\s+in\\s+(?<INTERFACE>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^. -> Error",
+          "actions": [{ "type": "next", "to": "details" }],
+          "transition": { "to": "self" }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
+    "version": "1.0.0",
+    "author": "community",
+    "tested": false
+  }
+}
+

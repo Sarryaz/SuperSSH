@@ -1,37 +1,57 @@
 {
-  "id": "aruba_show_ap_database_v1",
-  "name": "Aruba Show AP Database",
+  "id": "aruba_osswitch_show_cdp_neighbors_detail_v1",
+  "name": "Aruba OS Switch Show CDP Neighbors Detail",
   "vendor": "aruba",
-  "deviceOs": "aruba_os",
-  "command": "show ap database",
-  "description": "Parse AP database for Aruba OS",
+  "deviceOs": "aruba_osswitch",
+  "command": "show cdp neighbors detail",
+  "description": "Parse CDP neighbors detail for Aruba OS Switch",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<AP_NAME>\\S+)\\s+(?<GROUP>\\S+)\\s+(?<AP_MODEL>\\S+)\\s+(?<IP_ADDRESS>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<STATUS>.+?)\\s+(?<FLAGS>\\S+)\\s+(?<PRIMARY>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))\\s+(?<STANDBY>(((?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])))",
+          "regex": "^\\s*CDP\\s+neighbors\\s+information\\s*$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Port\\s*:\\s*(?<LOCAL_INTERFACE>.+?)\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Device\\s+ID\\s*:\\s*(?<CHASSIS_ID>.+?)\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Address\\s+Type\\s*$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Address\\s*:\\s*(?<MGMT_ADDRESS>.+?)\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Platform\\s*:\\s*(?<PLATFORM>.+?)\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Capability\\s*:\\s*(?<CAPABILITIES>.+?)\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Device\\s+Port\\s*:\\s*(?<NEIGHBOR_INTERFACE>.+?)\\s*$$",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^\\s*Version\\s*:\\s*(?<NEIGHBOR_DESCRIPTION>.+?)\\s*$$",
           "actions": [{ "type": "emit" }],
-          "transition": { "to": "self" }
-        },
-        {
-          "regex": "^AP Database",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
-        },
-        {
-          "regex": "^.+\\..+",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
-        },
-        {
-          "regex": "^Name\\s+Group\\s+AP Type\\s+IP Address\\s+Status\\s+Flags\\s+Switch IP\\s+Standby IP",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
-        },
-        {
-          "regex": "^Flags:",
-          "actions": [{ "type": "next", "to": "start" }],
           "transition": { "to": "start" }
         },
         {
@@ -40,17 +60,7 @@
           "transition": { "to": "start" }
         },
         {
-          "regex": "^\\s+$",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
-        },
-        {
-          "regex": "^Total",
-          "actions": [{ "type": "next", "to": "start" }],
-          "transition": { "to": "start" }
-        },
-        {
-          "regex": "^-+",
+          "regex": "^\\s*----\\s*$",
           "actions": [{ "type": "next", "to": "start" }],
           "transition": { "to": "start" }
         }

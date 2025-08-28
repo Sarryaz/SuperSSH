@@ -4,20 +4,18 @@
   "vendor": "aruba",
   "deviceOs": "aruba_aoscx",
   "command": "show interface brief",
-  "description": "Parse interface brief table",
+  "description": "Parse interface brief for AOS-CX",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<PORT>\\S+)\\s+(?<NATIVE_VLAN>\\d+)\\s+(?<MODE>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<ENABLED>yes|no)\\s+(?<STATUS>up|down)\\s+(?<SPEED>\\S+)\\s+(?<DESC>\\S+)$",
-          "flags": "i",
+          "regex": "^(?<PORT>\\S+)\\s+(?<NATIVE_VLAN>\\d+)\\s+(?<MODE>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<ENABLED>yes|no)\\s+(?<STATUS>up|down)\\s+(?<SPEED>\\S+)\\s+(?<DESC>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         },
         {
-          "regex": "^(?<PORT>\\S+)\\s+(?<NATIVE_VLAN>\\d+)\\s+(?<MODE>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<ENABLED>yes|no)\\s+(?<STATUS>up|down)\\s+(?<REASON>.+)\\s+(?<SPEED>\\S+)\\s+(?<DESC>\\S+)$",
-          "flags": "i",
+          "regex": "^(?<PORT>\\S+)\\s+(?<NATIVE_VLAN>\\d+)\\s+(?<MODE>\\S+)\\s+(?<TYPE>\\S+)\\s+(?<ENABLED>yes|no)\\s+(?<STATUS>up|down)\\s+(?<REASON>.+?)\\s+(?<SPEED>\\S+)\\s+(?<DESC>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         }

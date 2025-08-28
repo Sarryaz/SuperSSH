@@ -4,18 +4,18 @@
   "vendor": "aruba",
   "deviceOs": "aruba_aoscx",
   "command": "show arp",
-  "description": "Parse ARP entries for AOS-CX",
+  "description": "Parse ARP table for AOS-CX",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<TYPE>\\S+)\\s+(?<FLAGS>\\S+)\\s+(?<HW_ADDRESS>\\S+)\\s+(?<MASK>\\S+)\\s+(?<DEVICE>\\S+)$",
+          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<TYPE>\\S+)\\s+(?<FLAGS>\\S+)\\s+(?<HW_ADDRESS>\\S+)\\s+(?<MASK>\\S+)\\s+(?<DEVICE>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         },
         {
-          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<MAC_ADDRESS>\\S+)\\s+(?<PORT>\\S+)\\s+(?<PHYSICAL_PORT>\\S+)$",
+          "regex": "^(?<IP_ADDRESS>\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(?<MAC_ADDRESS>\\S+)\\s+(?<PORT>\\S+)\\s+(?<PHYSICAL_PORT>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         }

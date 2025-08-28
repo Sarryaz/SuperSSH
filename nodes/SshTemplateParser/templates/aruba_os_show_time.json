@@ -1,16 +1,16 @@
 {
-  "id": "aruba_aoscx_show_mac_address_table_v1",
-  "name": "AOS-CX Show MAC Address Table",
+  "id": "aruba_os_show_time_v1",
+  "name": "Aruba OS Show Time",
   "vendor": "aruba",
-  "deviceOs": "aruba_aoscx",
-  "command": "show mac-address-table",
-  "description": "Parse MAC address table for AOS-CX",
+  "deviceOs": "aruba_os",
+  "command": "show time",
+  "description": "Parse system time for Aruba OS",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<MAC_ADDRESS>\\S+)\\s+(?<VLAN_ID>\\d+)\\s+(?<TYPE>\\S+)\\s+(?<PORT>\\S+)",
+          "regex": "^(?<DAYWEEK>\\w\\w\\w)\\s(?<MONTH>\\w\\w\\w)\\s(?<DAY>\\d+)\\s(?<TIME>\\d+:\\d+:\\d+)\\s(?<YEAR>\\d+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         }

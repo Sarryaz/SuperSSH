@@ -1,16 +1,16 @@
 {
-  "id": "aruba_aoscx_show_mac_address_table_v1",
-  "name": "AOS-CX Show MAC Address Table",
+  "id": "aruba_aoscx_show_ip_route_v1",
+  "name": "AOS-CX Show IP Route",
   "vendor": "aruba",
   "deviceOs": "aruba_aoscx",
-  "command": "show mac-address-table",
-  "description": "Parse MAC address table for AOS-CX",
+  "command": "show ip route",
+  "description": "Parse IP route for AOS-CX",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<MAC_ADDRESS>\\S+)\\s+(?<VLAN_ID>\\d+)\\s+(?<TYPE>\\S+)\\s+(?<PORT>\\S+)",
+          "regex": "^(?<PREFIX>[\\d\\.\\/]+)\\s+(?<NEXTHOP>\\S+)\\s+(?<INTERFACE>\\S+)\\s+(?<VRF>\\S+)\\s+(?<TYPE>\\S+)\\s+\\[(?<DISTANCE>\\d+)\\/(?<METRIC>\\d+)\\]\\s+(?<AGE>\\S+)",
           "actions": [{ "type": "emit" }],
           "transition": { "to": "self" }
         }
@@ -25,3 +25,4 @@
     "tested": false
   }
 }
+

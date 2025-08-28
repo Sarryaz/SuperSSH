@@ -4,27 +4,39 @@
   "vendor": "aruba",
   "deviceOs": "aruba_os",
   "command": "show system",
-  "description": "Parse key-value system info",
+  "description": "Parse system information for Aruba OS",
   "states": [
     {
       "name": "start",
       "patterns": [
         {
-          "regex": "^(?<key>[A-Za-z0-9 _-]+):\s+(?<value>.*)$",
-          "actions": [
-            { "type": "append", "variable": "entries", "fromGroup": "key" },
-            { "type": "append", "variable": "entries", "fromGroup": "value" }
-          ],
-          "transition": { "to": "self" }
+          "regex": "^System\\s+Name\\s*:\\s*(?<SYSTEM_NAME>\\S+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^System\\s+Description\\s*:\\s*(?<SYSTEM_DESCRIPTION>.+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^System\\s+Contact\\s*:\\s*(?<SYSTEM_CONTACT>.+)",
+          "actions": [{ "type": "next", "to": "start" }],
+          "transition": { "to": "start" }
+        },
+        {
+          "regex": "^System\\s+Location\\s*:\\s*(?<SYSTEM_LOCATION>.+)",
+          "actions": [{ "type": "emit" }],
+          "transition": { "to": "start" }
         }
       ]
     }
   ],
   "metadata": {
-    "created": "2025-01-01T00:00:00.000Z",
-    "updated": "2025-01-01T00:00:00.000Z",
+    "created": "2025-08-23T00:00:00.000Z",
+    "updated": "2025-08-23T00:00:00.000Z",
     "version": "1.0.0",
-    "author": "auto",
+    "author": "community",
     "tested": false
   }
 }
